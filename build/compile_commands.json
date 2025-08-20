@@ -1,8 +1,8 @@
 [
 {
   "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/main.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/main.cpp",
-  "file": "/Users/colintaylortaylor/Documents/raytracer/main.cpp",
-  "output": "CMakeFiles/RayTracer.dir/main.cpp.o"
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/main.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/main.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/main.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/main.cpp.o"
 }
 ]
