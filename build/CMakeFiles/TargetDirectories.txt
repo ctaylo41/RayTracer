@@ -1,0 +1,3 @@
+/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles/RayTracer.dir
+/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles/edit_cache.dir
+/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles/rebuild_cache.dir
