@@ -12,7 +12,7 @@ find_package(glm REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include)
 
-add_executable(RayTracer ${CMAKE_SOURCE_DIR}/src/main.cpp)
+add_executable(RayTracer ${CMAKE_SOURCE_DIR}/src/main.cpp ${CMAKE_SOURCE_DIR}/glad/src/glad.c)
 
 if(NOT GLEW_LIBRARIES)
     set(GLEW_LIBRARIES /opt/homebrew/lib/libGLEW.dylib)

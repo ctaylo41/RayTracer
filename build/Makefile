@@ -129,6 +129,30 @@ RayTracer/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/build
 .PHONY : RayTracer/fast
 
+glad/src/glad.o: glad/src/glad.c.o
+.PHONY : glad/src/glad.o
+
+# target to build an object file
+glad/src/glad.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/glad/src/glad.c.o
+.PHONY : glad/src/glad.c.o
+
+glad/src/glad.i: glad/src/glad.c.i
+.PHONY : glad/src/glad.i
+
+# target to preprocess a source file
+glad/src/glad.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/glad/src/glad.c.i
+.PHONY : glad/src/glad.c.i
+
+glad/src/glad.s: glad/src/glad.c.s
+.PHONY : glad/src/glad.s
+
+# target to generate assembly for a file
+glad/src/glad.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/glad/src/glad.c.s
+.PHONY : glad/src/glad.c.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... RayTracer"
+	@echo "... glad/src/glad.o"
+	@echo "... glad/src/glad.i"
+	@echo "... glad/src/glad.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
