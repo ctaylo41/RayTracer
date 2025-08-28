@@ -10,5 +10,35 @@
   "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/glad/src/glad.c.o -c /Users/colintaylortaylor/Documents/raytracer/glad/src/glad.c",
   "file": "/Users/colintaylortaylor/Documents/raytracer/glad/src/glad.c",
   "output": "CMakeFiles/RayTracer.dir/glad/src/glad.c.o"
+},
+{
+  "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/VAO.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/VAO.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/VAO.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/VAO.cpp.o"
+},
+{
+  "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/VBO.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/VBO.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/VBO.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/VBO.cpp.o"
+},
+{
+  "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/EBO.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/EBO.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/EBO.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/EBO.cpp.o"
+},
+{
+  "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/shader.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/shader.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/shader.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/shader.cpp.o"
+},
+{
+  "directory": "/Users/colintaylortaylor/Documents/raytracer/build",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++  -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/System/Library/Frameworks -I/opt/homebrew/include -I/Users/colintaylortaylor/Documents/raytracer/glad/include -I/Users/colintaylortaylor/Documents/raytracer/include -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -o CMakeFiles/RayTracer.dir/src/camera.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/camera.cpp",
+  "file": "/Users/colintaylortaylor/Documents/raytracer/src/camera.cpp",
+  "output": "CMakeFiles/RayTracer.dir/src/camera.cpp.o"
 }
 ]

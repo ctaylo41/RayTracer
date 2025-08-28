@@ -1,8 +1,18 @@
 file(REMOVE_RECURSE
   "CMakeFiles/RayTracer.dir/glad/src/glad.c.o"
   "CMakeFiles/RayTracer.dir/glad/src/glad.c.o.d"
+  "CMakeFiles/RayTracer.dir/src/EBO.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/EBO.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/VAO.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/VAO.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/VBO.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/VBO.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/camera.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/camera.cpp.o.d"
   "CMakeFiles/RayTracer.dir/src/main.cpp.o"
   "CMakeFiles/RayTracer.dir/src/main.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/shader.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/shader.cpp.o.d"
   "RayTracer"
   "RayTracer.pdb"
 )

@@ -12,7 +12,13 @@ find_package(glm REQUIRED)
 
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include)
 
-add_executable(RayTracer ${CMAKE_SOURCE_DIR}/src/main.cpp ${CMAKE_SOURCE_DIR}/glad/src/glad.c)
+add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp 
+                            ${CMAKE_SOURCE_DIR}/glad/src/glad.c 
+                            ${CMAKE_SOURCE_DIR}/src/VAO.cpp 
+                            ${CMAKE_SOURCE_DIR}/src/VBO.cpp 
+                            ${CMAKE_SOURCE_DIR}/src/EBO.cpp 
+                            ${CMAKE_SOURCE_DIR}/src/shader.cpp 
+                            ${CMAKE_SOURCE_DIR}/src/camera.cpp)
 
 if(NOT GLEW_LIBRARIES)
     set(GLEW_LIBRARIES /opt/homebrew/lib/libGLEW.dylib)

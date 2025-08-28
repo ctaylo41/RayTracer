@@ -9,7 +9,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/colintaylortaylor/Documents/raytracer/glad/src/glad.c" "CMakeFiles/RayTracer.dir/glad/src/glad.c.o" "gcc" "CMakeFiles/RayTracer.dir/glad/src/glad.c.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/EBO.cpp" "CMakeFiles/RayTracer.dir/src/EBO.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/EBO.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/VAO.cpp" "CMakeFiles/RayTracer.dir/src/VAO.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/VAO.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/VBO.cpp" "CMakeFiles/RayTracer.dir/src/VBO.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/VBO.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/camera.cpp" "CMakeFiles/RayTracer.dir/src/camera.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/camera.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/main.cpp" "CMakeFiles/RayTracer.dir/src/main.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/main.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/shader.cpp" "CMakeFiles/RayTracer.dir/src/shader.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/shader.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
