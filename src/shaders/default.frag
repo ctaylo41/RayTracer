@@ -3,6 +3,8 @@ in vec3 fragPos;
 in vec3 aColor;
 out vec4 fragColor;
 
+uniform sampler2D texture1;
+
 void main() {
-    fragColor = vec4(aColor, 1.0);
+    fragColor = texture(texture1, fragPos.xy);
 }

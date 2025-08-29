@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <string>
 #include "camera.h"
+#include "texture.h"
 
 const unsigned int width = 1200;
 const unsigned int height = 800;
@@ -20,25 +21,49 @@ float lastY = height / 2.0f;
 bool firstMouse = true;
 
 // Pyramid vertex data: position (x, y, z) and color (r, g, b)
+
+// positions (x, y, z), colors (r, g, b), UVs (u, v)
+
+// Each face has its own vertices and UVs for proper texture repetition
 std::vector<float> pyramidVertices = {
-    // positions         // colors
-     0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f, // top (red)
-    -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f, // front-left (green)
-     0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f, // front-right (blue)
-     0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, // back-right (yellow)
-    -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f  // back-left (magenta)
+    // Front face
+    0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.5f, 1.0f, // top
+   -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // left
+    0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f, // right
+
+    // Right face
+    0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.5f, 1.0f, // top
+    0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f, // left (was 0,0, now 1,0)
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // right (was 1,0, now 1,1)
+
+    // Back face
+    0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.5f, 1.0f, // top
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // left (was 0,0, now 1,1)
+   -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // right (was 1,0, now 0,1)
+
+    // Left face
+    0.0f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  0.5f, 1.0f, // top
+   -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.0f, 1.0f, // left (was 0,0, now 0,1)
+   -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // right
+
+    // Base (two triangles)
+   -0.5f, -0.5f, 0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f, // front-left
+    0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f, // front-right
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f, 0.0f,  1.0f, 1.0f, // back-right
+   -0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.0f, 1.0f  // back-left
 };
 
-// Pyramid indices (4 sides + base)
+
+// Pyramid indices (each face has its own vertices)
 std::vector<unsigned int> pyramidIndices = {
     // Sides
-    0, 1, 2, // front
-    0, 2, 3, // right
-    0, 3, 4, // back
-    0, 4, 1, // left
+    0, 1, 2,      // front
+    3, 4, 5,      // right
+    6, 7, 8,      // back
+    9, 10, 11,    // left
     // Base
-    1, 2, 3,
-    1, 3, 4
+    12, 13, 14,   // base triangle 1
+    12, 14, 15    // base triangle 2
 };
 
 
@@ -97,8 +122,16 @@ int main(int, char**){
     vbo.bind();
     ebo.bind();
 
-    vao.linkAttrib(vbo, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-    vao.linkAttrib(vbo, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.linkAttrib(vbo, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+    vao.linkAttrib(vbo, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    vao.linkAttrib(vbo, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    Texture myTexture("/Users/colintaylortaylor/Documents/raytracer/textures/brick.png", "diffuse", 0);
+    myTexture.bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    myTexture.unbind();
+
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -138,7 +171,14 @@ int main(int, char**){
         shaderProgram.setMat4("projection", glm::value_ptr(camera.getProjectionMatrix((float)width/(float)height)));
         shaderProgram.setMat4("model", glm::value_ptr(camera.getModelMatrix()));
 
+        myTexture.bind();
+        myTexture.texUnit(shaderProgram, "texture1", 0); // "texture1" is the uniform name in your shader
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
         glDrawElements(GL_TRIANGLES, pyramidIndices.size(), GL_UNSIGNED_INT, 0);
+        myTexture.unbind();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

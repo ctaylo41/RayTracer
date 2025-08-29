@@ -18,7 +18,10 @@ add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp
                             ${CMAKE_SOURCE_DIR}/src/VBO.cpp 
                             ${CMAKE_SOURCE_DIR}/src/EBO.cpp 
                             ${CMAKE_SOURCE_DIR}/src/shader.cpp 
-                            ${CMAKE_SOURCE_DIR}/src/camera.cpp)
+                            ${CMAKE_SOURCE_DIR}/src/camera.cpp
+                            ${CMAKE_SOURCE_DIR}/src/texture.cpp
+                            ${CMAKE_SOURCE_DIR}/src/stb.cpp
+                            )
 
 if(NOT GLEW_LIBRARIES)
     set(GLEW_LIBRARIES /opt/homebrew/lib/libGLEW.dylib)

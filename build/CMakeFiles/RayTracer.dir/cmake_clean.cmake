@@ -13,6 +13,10 @@ file(REMOVE_RECURSE
   "CMakeFiles/RayTracer.dir/src/main.cpp.o.d"
   "CMakeFiles/RayTracer.dir/src/shader.cpp.o"
   "CMakeFiles/RayTracer.dir/src/shader.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/stb.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/stb.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/texture.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/texture.cpp.o.d"
   "RayTracer"
   "RayTracer.pdb"
 )
