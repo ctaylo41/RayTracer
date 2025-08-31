@@ -18,6 +18,7 @@ public:
     ~Shader();
 	void setMat4(const std::string &name, const GLfloat* value) const;
 	void activate();
+	void deactivate();
 private:
 	void compileErrors(unsigned int shader, const char* type);
 };

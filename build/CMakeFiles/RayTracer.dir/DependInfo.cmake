@@ -14,6 +14,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/colintaylortaylor/Documents/raytracer/src/VBO.cpp" "CMakeFiles/RayTracer.dir/src/VBO.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/VBO.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/camera.cpp" "CMakeFiles/RayTracer.dir/src/camera.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/camera.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/main.cpp" "CMakeFiles/RayTracer.dir/src/main.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/main.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/model.cpp" "CMakeFiles/RayTracer.dir/src/model.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/model.cpp.o.d"
+  "/Users/colintaylortaylor/Documents/raytracer/src/scene.cpp" "CMakeFiles/RayTracer.dir/src/scene.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/scene.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/shader.cpp" "CMakeFiles/RayTracer.dir/src/shader.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/shader.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/stb.cpp" "CMakeFiles/RayTracer.dir/src/stb.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/stb.cpp.o.d"
   "/Users/colintaylortaylor/Documents/raytracer/src/texture.cpp" "CMakeFiles/RayTracer.dir/src/texture.cpp.o" "gcc" "CMakeFiles/RayTracer.dir/src/texture.cpp.o.d"

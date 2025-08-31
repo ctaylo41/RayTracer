@@ -1,6 +1,6 @@
 #include "texture.h"
 
-Texture::Texture(const char* image, const char* texType, GLuint slot)
+Texture::Texture(const char* image, TextureType texType, GLuint slot)
     : type(texType), unit(slot)
 {
     // Load and create texture

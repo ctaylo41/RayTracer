@@ -195,6 +195,34 @@ CMakeFiles/RayTracer.dir/src/stb.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/RayTracer.dir/src/stb.cpp.s"
 	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/colintaylortaylor/Documents/raytracer/src/stb.cpp -o CMakeFiles/RayTracer.dir/src/stb.cpp.s
 
+CMakeFiles/RayTracer.dir/src/scene.cpp.o: CMakeFiles/RayTracer.dir/flags.make
+CMakeFiles/RayTracer.dir/src/scene.cpp.o: /Users/colintaylortaylor/Documents/raytracer/src/scene.cpp
+CMakeFiles/RayTracer.dir/src/scene.cpp.o: CMakeFiles/RayTracer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/RayTracer.dir/src/scene.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/RayTracer.dir/src/scene.cpp.o -MF CMakeFiles/RayTracer.dir/src/scene.cpp.o.d -o CMakeFiles/RayTracer.dir/src/scene.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/scene.cpp
+
+CMakeFiles/RayTracer.dir/src/scene.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/RayTracer.dir/src/scene.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/colintaylortaylor/Documents/raytracer/src/scene.cpp > CMakeFiles/RayTracer.dir/src/scene.cpp.i
+
+CMakeFiles/RayTracer.dir/src/scene.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/RayTracer.dir/src/scene.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/colintaylortaylor/Documents/raytracer/src/scene.cpp -o CMakeFiles/RayTracer.dir/src/scene.cpp.s
+
+CMakeFiles/RayTracer.dir/src/model.cpp.o: CMakeFiles/RayTracer.dir/flags.make
+CMakeFiles/RayTracer.dir/src/model.cpp.o: /Users/colintaylortaylor/Documents/raytracer/src/model.cpp
+CMakeFiles/RayTracer.dir/src/model.cpp.o: CMakeFiles/RayTracer.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/RayTracer.dir/src/model.cpp.o"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/RayTracer.dir/src/model.cpp.o -MF CMakeFiles/RayTracer.dir/src/model.cpp.o.d -o CMakeFiles/RayTracer.dir/src/model.cpp.o -c /Users/colintaylortaylor/Documents/raytracer/src/model.cpp
+
+CMakeFiles/RayTracer.dir/src/model.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/RayTracer.dir/src/model.cpp.i"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/colintaylortaylor/Documents/raytracer/src/model.cpp > CMakeFiles/RayTracer.dir/src/model.cpp.i
+
+CMakeFiles/RayTracer.dir/src/model.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/RayTracer.dir/src/model.cpp.s"
+	/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/colintaylortaylor/Documents/raytracer/src/model.cpp -o CMakeFiles/RayTracer.dir/src/model.cpp.s
+
 # Object files for target RayTracer
 RayTracer_OBJECTS = \
 "CMakeFiles/RayTracer.dir/src/main.cpp.o" \
@@ -205,7 +233,9 @@ RayTracer_OBJECTS = \
 "CMakeFiles/RayTracer.dir/src/shader.cpp.o" \
 "CMakeFiles/RayTracer.dir/src/camera.cpp.o" \
 "CMakeFiles/RayTracer.dir/src/texture.cpp.o" \
-"CMakeFiles/RayTracer.dir/src/stb.cpp.o"
+"CMakeFiles/RayTracer.dir/src/stb.cpp.o" \
+"CMakeFiles/RayTracer.dir/src/scene.cpp.o" \
+"CMakeFiles/RayTracer.dir/src/model.cpp.o"
 
 # External object files for target RayTracer
 RayTracer_EXTERNAL_OBJECTS =
@@ -219,11 +249,15 @@ RayTracer: CMakeFiles/RayTracer.dir/src/shader.cpp.o
 RayTracer: CMakeFiles/RayTracer.dir/src/camera.cpp.o
 RayTracer: CMakeFiles/RayTracer.dir/src/texture.cpp.o
 RayTracer: CMakeFiles/RayTracer.dir/src/stb.cpp.o
+RayTracer: CMakeFiles/RayTracer.dir/src/scene.cpp.o
+RayTracer: CMakeFiles/RayTracer.dir/src/model.cpp.o
 RayTracer: CMakeFiles/RayTracer.dir/build.make
 RayTracer: /opt/homebrew/opt/glfw/lib/libglfw.dylib
 RayTracer: /opt/homebrew/lib/libGLEW.dylib
+RayTracer: /opt/homebrew/lib/libassimp.6.0.2.dylib
+RayTracer: /Library/Developer/CommandLineTools/SDKs/MacOSX15.sdk/usr/lib/libz.tbd
 RayTracer: CMakeFiles/RayTracer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable RayTracer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/Users/colintaylortaylor/Documents/raytracer/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable RayTracer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/RayTracer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

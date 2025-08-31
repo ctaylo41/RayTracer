@@ -1,24 +1,34 @@
 #ifndef TEXTURE_CLASS
 #define TEXTURE_CLASS
 
-#include<glad/glad.h>
-#include<stb_image.h>
+#include <glad/glad.h>
+#include <stb_image.h>
+#include <string>
 
-#include"shader.h"
+enum class TextureType {
+	Diffuse,
+	Specular,
+	Normal,
+	Emissive,
+	Metallic,
+	Roughness,
+	Occlusion,
+	Unknown
+};
 
-class Texture
-{
+#include "shader.h"
+
+class Texture {
 public:
 	GLuint ID;
-	const char* type;
+	TextureType type;
 	GLuint unit;
 
-	Texture(const char* image, const char* texType, GLuint slot);
+	Texture(const char* image, TextureType texType, GLuint slot);
 
 	void texUnit(Shader& shader, const char* uniform, GLuint unit);
 
 	void bind();
-    
 	void unbind();
 
 	~Texture();

@@ -2,19 +2,27 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
-    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f), zoom(45.0f)
+Camera::Camera() 
+{
+    // Default constructor implementation (can be left empty or initialize members if needed)
+}
+
+Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float fov, float far, float near, unsigned int width, unsigned int height)
+    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f), zoom(fov), farPlane(far), nearPlane(near), width(width), height(height)
 {
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     updateCameraVectors();
+    viewMatrix = setViewMatrix();
+    projectionMatrix = setProjectionMatrix(static_cast<float>(width) / static_cast<float>(height));
+    modelMatrix = setModelMatrix();
 }
 
-glm::mat4 Camera::getViewMatrix() {
+glm::mat4 Camera::setViewMatrix() {
     return glm::lookAt(position, position + front, up);
 }
 
-glm::mat4 Camera::getProjectionMatrix(float aspectRatio) {
-    return glm::perspective(glm::radians(zoom), aspectRatio, 0.1f, 100.0f);
+glm::mat4 Camera::setProjectionMatrix(float aspectRatio) {
+    return glm::perspective(glm::radians(zoom), aspectRatio, nearPlane, farPlane);
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {

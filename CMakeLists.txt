@@ -9,8 +9,9 @@ find_package(PkgConfig REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
+find_package(assimp REQUIRED)
 
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include)
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include ${ASSIMP_INCLUDE_DIRS})
 
 add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp 
                             ${CMAKE_SOURCE_DIR}/glad/src/glad.c 
@@ -21,7 +22,9 @@ add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp
                             ${CMAKE_SOURCE_DIR}/src/camera.cpp
                             ${CMAKE_SOURCE_DIR}/src/texture.cpp
                             ${CMAKE_SOURCE_DIR}/src/stb.cpp
-                            )
+                            ${CMAKE_SOURCE_DIR}/src/scene.cpp
+                            ${CMAKE_SOURCE_DIR}/src/model.cpp)
+
 
 if(NOT GLEW_LIBRARIES)
     set(GLEW_LIBRARIES /opt/homebrew/lib/libGLEW.dylib)
@@ -30,4 +33,4 @@ if(NOT GLFW_LIBRARIES)
     set(GLFW_LIBRARIES /opt/homebrew/opt/glfw/lib/libglfw.dylib)
 endif()
 
-target_link_libraries(RayTracer ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES})
+target_link_libraries(RayTracer ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} ${ASSIMP_LIBRARIES})
