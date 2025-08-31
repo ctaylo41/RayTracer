@@ -15,7 +15,8 @@ public:
     void addModel(Model&& model); // Accept Model by move
     void setCamera(const Camera& camera);
     const std::vector<Model>& getModels() const;
-    const Camera& getCamera() const;
+    Camera& getCamera();
+
     bool loadGLTF(const std::string& path);
     void draw(Shader& shader);
 

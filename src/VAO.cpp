@@ -15,8 +15,6 @@ VertexArrayObject::VertexArrayObject() : renderID(0) {
     
     if (renderID == 0) {
         std::cerr << "Failed to generate VAO - got ID 0!" << std::endl;
-    } else {
-        std::cout << "VAO created with ID: " << renderID << std::endl;
     }
 }
 

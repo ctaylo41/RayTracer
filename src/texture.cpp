@@ -5,7 +5,6 @@
 Texture::Texture(const char* image, TextureType texType, GLuint slot)
     : type(texType), unit(slot), loaded(false), filePath(image), initialized(false), ID(0)
 {
-    std::cout << "Texture constructor - storing path: " << filePath << std::endl;
     // Don't create OpenGL objects here - defer until first use
 }
 
@@ -45,7 +44,6 @@ void Texture::initializeGL() {
     if (initialized) return;
     
     
-    std::cout << "Initializing texture from: " << filePath << std::endl;
 
     checkGLError("init texture");
 
@@ -63,7 +61,6 @@ void Texture::initializeGL() {
         return;
     }
     
-    std::cout << "Generated texture ID: " << ID << std::endl;
     
     glBindTexture(GL_TEXTURE_2D, ID);
     checkGLError("binding texture");
@@ -81,7 +78,6 @@ void Texture::initializeGL() {
     unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nrChannels, 0);
     
     if (data) {
-        std::cout << "Loaded image data: " << width << "x" << height << " with " << nrChannels << " channels" << std::endl;
         
         // Determine format
         GLenum format = GL_RGB;
@@ -117,7 +113,6 @@ void Texture::initializeGL() {
         glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &textureWidth);
         if (textureWidth > 0) {
             loaded = true;
-            std::cout << "Texture loaded successfully with ID: " << ID << std::endl;
         } else {
             std::cerr << "Texture upload failed - width is 0" << std::endl;
         }
@@ -147,7 +142,7 @@ void Texture::texUnit(Shader& shader, const char* uniform, GLuint unit) {
     // Check if uniform exists
     GLint uniformLocation = glGetUniformLocation(shader.ID, uniform);
     if (uniformLocation == -1) {
-        std::cout << "Warning: Uniform '" << uniform << "' not found in shader" << std::endl;
+        std::cerr << "Warning: Uniform '" << uniform << "' not found in shader" << std::endl;
         return;
     }
 

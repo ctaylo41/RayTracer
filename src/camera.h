@@ -5,6 +5,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
+#include <iostream>
+
 
 
 enum Camera_Movement {
@@ -24,15 +27,13 @@ public:
 	glm::mat4 setProjectionMatrix(float aspectRatio);
 	glm::mat4 setModelMatrix() { return glm::mat4(1.0f); }
 
-	glm::mat4 getViewMatrix() { return viewMatrix; }
-	glm::mat4 getProjectionMatrix() { return projectionMatrix; }
-	glm::mat4 getModelMatrix() { return modelMatrix; }
+	glm::mat4 getViewMatrix() const;
+	glm::mat4 getProjectionMatrix() const;
+	glm::mat4 getModelMatrix() const { return modelMatrix; }
 
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 	void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 	void ProcessMouseScroll(float yoffset);
-
-
 
 
 private:

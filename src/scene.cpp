@@ -47,10 +47,10 @@ bool Scene::loadGLTF(const std::string& path) {
     } else {
         std::cout << "No camera found in glTF file." << std::endl;
         // Set a default camera
-        glm::vec3 position(0.0f, 0.0f, 3.0f);
+        glm::vec3 position(0.0f, 5.0f, 15.0f);
         glm::vec3 up(0.0f, 1.0f, 0.0f);
         float yaw = -90.0f;
-        float pitch = 0.0f;
+        float pitch = -15.0f;
         float fov = 45.0f;
         float nearPlane = 0.1f;
         float farPlane = 100.0f;
@@ -123,35 +123,162 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
     // Texture References
     if (mesh->mMaterialIndex >= 0) {
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        for (int type = aiTextureType_NONE; type <= aiTextureType_UNKNOWN; ++type) {
-            for (unsigned int i = 0; i < material->GetTextureCount((aiTextureType)type); ++i) {
-                aiString str;
-                material->GetTexture((aiTextureType)type, i, &str); // Fill str with texture path
-                TextureType texType = TextureType::Unknown;
-                switch ((aiTextureType)type) {
-                    case aiTextureType_DIFFUSE: texType = TextureType::Diffuse; break;
-                    case aiTextureType_SPECULAR: texType = TextureType::Specular; break;
-                    case aiTextureType_NORMALS: texType = TextureType::Normal; break;
-                    case aiTextureType_EMISSIVE: texType = TextureType::Emissive; break;
-                    case aiTextureType_METALNESS: texType = TextureType::Metallic; break;
-                    case aiTextureType_DIFFUSE_ROUGHNESS: texType = TextureType::Roughness; break;
-                    case aiTextureType_LIGHTMAP: texType = TextureType::Occlusion; break;
-                    default: texType = TextureType::Unknown; break;
-                }
+        
+        
+        // Get base color texture (albedo/diffuse)
+        aiString baseColorPath;
+        if (material->GetTexture(aiTextureType_BASE_COLOR, 0, &baseColorPath) == AI_SUCCESS ||
+            material->GetTexture(aiTextureType_DIFFUSE, 0, &baseColorPath) == AI_SUCCESS) {
+            
+            std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
+            std::string texPath = baseColorPath.C_Str();
+            
+            if (!std::filesystem::path(texPath).is_absolute()) {
+                texPath = (gltfDir / texPath).string();
+            }
+            
+            Texture texture(texPath.c_str(), TextureType::Diffuse, 0);
+            textures.push_back(std::move(texture));
+        }
+        
+        // Get normal texture
+        aiString normalPath;
+        if (material->GetTexture(aiTextureType_NORMALS, 0, &normalPath) == AI_SUCCESS ||
+            material->GetTexture(aiTextureType_HEIGHT, 0, &normalPath) == AI_SUCCESS) {
+            
+            std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
+            std::string texPath = normalPath.C_Str();
+            
+            if (!std::filesystem::path(texPath).is_absolute()) {
+                texPath = (gltfDir / texPath).string();
+            }
+            
+            Texture texture(texPath.c_str(), TextureType::Normal, 1);
+            textures.push_back(std::move(texture));
+        }
+        
+        // Get metallic-roughness texture
+        aiString metallicRoughnessPath;
+        if (material->GetTexture(aiTextureType_METALNESS, 0, &metallicRoughnessPath) == AI_SUCCESS ||
+            material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &metallicRoughnessPath) == AI_SUCCESS) {
+            
+            std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
+            std::string texPath = metallicRoughnessPath.C_Str();
+            
+            if (!std::filesystem::path(texPath).is_absolute()) {
+                texPath = (gltfDir / texPath).string();
+            }
+            
+            Texture texture(texPath.c_str(), TextureType::Metallic, 2);
+            textures.push_back(std::move(texture));
+        }
+        
+        // Get occlusion texture
+        aiString occlusionPath;
+        if (material->GetTexture(aiTextureType_LIGHTMAP, 0, &occlusionPath) == AI_SUCCESS ||
+            material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &occlusionPath) == AI_SUCCESS) {
+            
+            std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
+            std::string texPath = occlusionPath.C_Str();
+            
+            if (!std::filesystem::path(texPath).is_absolute()) {
+                texPath = (gltfDir / texPath).string();
+            }
+            
+            Texture texture(texPath.c_str(), TextureType::Occlusion, 3);
+            textures.push_back(std::move(texture));
+        }
+        
+        // Get emissive texture
+        aiString emissivePath;
+        if (material->GetTexture(aiTextureType_EMISSIVE, 0, &emissivePath) == AI_SUCCESS) {
+            std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
+            std::string texPath = emissivePath.C_Str();
+            
+            if (!std::filesystem::path(texPath).is_absolute()) {
+                texPath = (gltfDir / texPath).string();
+            }
+            
+            Texture texture(texPath.c_str(), TextureType::Emissive, 4);
+            textures.push_back(std::move(texture));
+        }
+        
+    }
 
-                std::filesystem::path gltfDir = std::filesystem::path(gltfFilePath).parent_path();
-                std::string texPath = str.C_Str();
+    glm::mat4 modelMatrix(1.0f);
 
-                if (!std::filesystem::path(texPath).is_absolute()) {
-                    texPath = (gltfDir / texPath).string();
-                }
-                
-                Texture texture(texPath.c_str(), texType, 0);
-                textures.push_back(std::move(texture));
+    // Find the node that references this mesh
+    std::function<const aiNode*(const aiNode*)> findMeshNode = [&](const aiNode* node) -> const aiNode* {
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
+            if (scene->mMeshes[node->mMeshes[i]] == mesh) {
+                return node;
             }
         }
+        for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+            const aiNode* found = findMeshNode(node->mChildren[i]);
+            if (found) return found;
+        }
+        return nullptr;
+    };
+
+    const aiNode* meshNode = findMeshNode(scene->mRootNode);
+    if (meshNode) {
+        aiMatrix4x4 aiMat = meshNode->mTransformation;
+        const aiNode* parent = meshNode->mParent;
+        while (parent) {
+            aiMat = parent->mTransformation * aiMat;
+            parent = parent->mParent;
+        }
+        // Convert aiMatrix4x4 to glm::mat4
+        modelMatrix = glm::mat4(
+            aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1,
+            aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2,
+            aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3,
+            aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4
+        );
     }
-    return Model(vertices, indices, colors, textures, normals, uvs);
+
+
+    MaterialProperties matProps;
+    aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+    // Get base color factor
+    aiColor4D baseColorFactor;
+    if (material->Get(AI_MATKEY_BASE_COLOR, baseColorFactor) == AI_SUCCESS) {
+        matProps.baseColorFactor = glm::vec4(baseColorFactor.r, baseColorFactor.g, baseColorFactor.b, baseColorFactor.a);
+        std::cout << "Base color factor: (" << baseColorFactor.r << ", " << baseColorFactor.g << ", " << baseColorFactor.b << ", " << baseColorFactor.a << ")" << std::endl;
+    }
+
+    // Get alpha cutoff
+    float alphaCutoff = 0.5f;
+    if (material->Get(AI_MATKEY_OPACITY, alphaCutoff) == AI_SUCCESS) {
+        matProps.alphaCutoff = alphaCutoff;
+        std::cout << "Alpha cutoff: " << alphaCutoff << std::endl;
+        matProps.alphaMode_MASK = true;
+    }
+
+    // Get metallic factor
+    float metallicFactor = 1.0f;
+    if (material->Get(AI_MATKEY_METALLIC_FACTOR, metallicFactor) == AI_SUCCESS) {
+        matProps.metallicFactor = metallicFactor;
+        std::cout << "Metallic factor: " << metallicFactor << std::endl;
+    }
+
+    // Get roughness factor
+    float roughnessFactor = 1.0f;
+    if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, roughnessFactor) == AI_SUCCESS) {
+        matProps.roughnessFactor = roughnessFactor;
+        std::cout << "Roughness factor: " << roughnessFactor << std::endl;
+    }
+
+    // Check for double sided
+    int twoSided = 0;
+    if (material->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS) {
+        matProps.doubleSided = (twoSided != 0);
+        std::cout << "Double sided: " << matProps.doubleSided << std::endl;
+    }
+
+    // Pass modelMatrix to Model constructor
+    return Model(vertices, indices, colors, textures, normals, uvs, modelMatrix, matProps);
 }
 
 void Scene::addModel(Model&& model) { // Accept Model by move
@@ -162,11 +289,12 @@ void Scene::setCamera(const Camera& camera) {
     this->camera = camera;
 }
 
-const Camera& Scene::getCamera() const {
+Camera& Scene::getCamera() {
     return this->camera;
 }
 
 void Scene::draw(Shader& shader) {
+
     for (Model& model : models) {
         model.draw(shader, camera);
     }

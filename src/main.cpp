@@ -80,39 +80,47 @@ int main(int, char**){
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
     Scene scene("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/glTF/Sponza.gltf");
     GLenum err;
     
-    Camera camera = scene.getCamera();
+    Camera& camera = scene.getCamera();
     glfwSetWindowUserPointer(window, &camera);
 
     float deltaTime = 0.0f; // Time between current frame and last frame
     float lastFrame = 0.0f;
+    float fpsTimer = 0.0f;
+    int frameCount = 0;
 
-    
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        Camera* cameraPtr = static_cast<Camera*>(glfwGetWindowUserPointer(window));
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            camera.ProcessKeyboard(FORWARD, deltaTime);
+            cameraPtr->ProcessKeyboard(FORWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            camera.ProcessKeyboard(BACKWARD, deltaTime);
+            cameraPtr->ProcessKeyboard(BACKWARD, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            camera.ProcessKeyboard(LEFT, deltaTime);
+            cameraPtr->ProcessKeyboard(LEFT, deltaTime);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            camera.ProcessKeyboard(RIGHT, deltaTime);
-
+            cameraPtr->ProcessKeyboard(RIGHT, deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         scene.draw(shaderProgram);
-        
-
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        // FPS calculation and window title update
+        frameCount++;
+        fpsTimer += deltaTime;
+        if (fpsTimer >= 1.0f) {
+            float fps = frameCount / fpsTimer;
+            std::string title = "Ray Tracer - FPS: " + std::to_string(static_cast<int>(fps));
+            glfwSetWindowTitle(window, title.c_str());
+            frameCount = 0;
+            fpsTimer = 0.0f;
+        }
     }
 
     glfwDestroyWindow(window);

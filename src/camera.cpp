@@ -8,33 +8,47 @@ Camera::Camera()
 }
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float fov, float far, float near, unsigned int width, unsigned int height)
-    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(2.5f), mouseSensitivity(0.1f), zoom(fov), farPlane(far), nearPlane(near), width(width), height(height)
+    : position(position), worldUp(up), yaw(yaw), pitch(pitch), movementSpeed(5.0f), mouseSensitivity(0.1f), zoom(fov), farPlane(far), nearPlane(near), width(width), height(height)
 {
-    front = glm::vec3(0.0f, 0.0f, -1.0f);
+    // Initialize vectors first
     updateCameraVectors();
+    
+    // Then calculate matrices with correct vectors
     viewMatrix = setViewMatrix();
     projectionMatrix = setProjectionMatrix(static_cast<float>(width) / static_cast<float>(height));
     modelMatrix = setModelMatrix();
 }
 
 glm::mat4 Camera::setViewMatrix() {
-    return glm::lookAt(position, position + front, up);
+    viewMatrix = glm::lookAt(position, position + front, up);
+    return viewMatrix;
 }
 
 glm::mat4 Camera::setProjectionMatrix(float aspectRatio) {
-    return glm::perspective(glm::radians(zoom), aspectRatio, nearPlane, farPlane);
+    projectionMatrix = glm::perspective(glm::radians(zoom), aspectRatio, nearPlane, farPlane);
+    return projectionMatrix;
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
-    if (direction == FORWARD)
-        position += front * velocity;
-    if (direction == BACKWARD)
-        position -= front * velocity;
-    if (direction == LEFT)
-        position -= right * velocity;
-    if (direction == RIGHT)
-        position += right * velocity;
+    if (direction == FORWARD) {
+        this->position += front * velocity;
+    }
+
+    if (direction == BACKWARD) {
+        this->position -= front * velocity;
+    }
+    
+    if (direction == LEFT) {
+        this->position -= right * velocity;
+    }
+
+    if (direction == RIGHT) {
+        this->position += right * velocity;
+    }
+
+    updateCameraVectors();
+
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
@@ -59,6 +73,7 @@ void Camera::ProcessMouseScroll(float yoffset) {
         zoom = 1.0f;
     if (zoom > 45.0f)
         zoom = 45.0f;
+
 }
 
 void Camera::updateCameraVectors() {
@@ -66,10 +81,17 @@ void Camera::updateCameraVectors() {
     newFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     newFront.y = sin(glm::radians(pitch));
     newFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front = glm::normalize(newFront);
-    right = glm::normalize(glm::cross(front, worldUp));
-    up    = glm::normalize(glm::cross(right, front));
+    this->front = glm::normalize(newFront);
+    this->right = glm::normalize(glm::cross(this->front, this->worldUp));
+    this->up    = glm::normalize(glm::cross(this->right, this->front));
+    // Remove setViewMatrix() call
 }
 
 
+glm::mat4 Camera::getViewMatrix() const {
+    return glm::lookAt(this->position, this->position + this->front, this->up);
+}
 
+glm::mat4 Camera::getProjectionMatrix() const {
+    return glm::perspective(glm::radians(zoom), static_cast<float>(width) / static_cast<float>(height), nearPlane, farPlane);
+}

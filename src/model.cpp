@@ -22,9 +22,10 @@ static std::vector<Vertex> assembleVertices(
 
 Model::Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, 
              const std::vector<glm::vec3>& colors, std::vector<Texture>& textures, 
-             const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs) :
+             const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs,
+             const glm::mat4x4& modelMatrix, const MaterialProperties& material) :
     vertices(vertices), indices(indices), colors(colors), textures(std::move(textures)), 
-    normals(normals), uvs(uvs), initialized(false)
+    normals(normals), uvs(uvs), initialized(false), modelMatrix(modelMatrix), material(material)
 {
     // Don't create OpenGL objects in constructor - defer until first draw
     //std::cout << "Model constructor called - deferring OpenGL object creation" << std::endl;
@@ -85,19 +86,55 @@ void Model::draw(Shader& shader, Camera& camera) {
     for (size_t i = 0; i < textures.size(); ++i) {
         std::string uniformName;
         switch (textures[i].type) {
-            case TextureType::Diffuse:  uniformName = "diffuseMap"; break;
-            case TextureType::Specular: uniformName = "specularMap"; break;
-            default: uniformName = "texture" + std::to_string(i); break;
+            case TextureType::Diffuse:  
+                uniformName = "baseColorTexture"; 
+                break;
+            case TextureType::Normal:   
+                uniformName = "normalTexture"; 
+                break;
+            case TextureType::Metallic: 
+                uniformName = "metallicRoughnessTexture"; 
+                break;
+            case TextureType::Roughness: 
+                uniformName = "metallicRoughnessTexture"; 
+                break;
+            case TextureType::Occlusion: 
+                uniformName = "occlusionTexture"; 
+                break;
+            case TextureType::Emissive: 
+                uniformName = "emissiveTexture"; 
+                break;
+            case TextureType::Specular: 
+                uniformName = "specularTexture"; 
+                break;
+            default: 
+                uniformName = "texture" + std::to_string(i); 
+                break;
         }
         textures[i].bind();
-        textures[i].texUnit(shader, uniformName.c_str(), static_cast<GLuint>(i));
+        textures[i].texUnit(shader, uniformName.c_str(), textures[i].unit);
     }
 
 
     // Set matrices
+    //std::cout << camera.printViewMatrix() << std::endl;
     shader.setMat4("view", glm::value_ptr(camera.getViewMatrix()));
     shader.setMat4("projection", glm::value_ptr(camera.getProjectionMatrix()));
-    shader.setMat4("model", glm::value_ptr(camera.getModelMatrix()));
+    shader.setMat4("model", glm::value_ptr(this->getModelMatrix()));
+
+
+    shader.setVec4("baseColorFactor", glm::value_ptr(material.baseColorFactor));
+    shader.setFloat("alphaCutoff", material.alphaCutoff);
+    shader.setFloat("metallicFactor", material.metallicFactor);
+    shader.setFloat("roughnessFactor", material.roughnessFactor);
+    shader.setBool("useAlphaBlending", material.alphaMode_MASK);
+    // Enable/disable face culling based on doubleSided
+    glEnable(GL_CULL_FACE);
+    // if (material.doubleSided) {
+    //     glDisable(GL_CULL_FACE);
+    // } else {
+    //     glEnable(GL_CULL_FACE);
+    //}
     // Draw
     vao->bind();
 
