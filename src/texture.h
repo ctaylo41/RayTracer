@@ -24,10 +24,23 @@ public:
     GLuint ID;
     TextureType type;
     GLuint unit;
-    bool loaded; // Track if texture loaded successfully
+    bool loaded;
+    std::string filePath; // Store the file path for deferred loading
 
+    // Constructor now just stores the path - doesn't load immediately
     Texture(const char* image, TextureType texType, GLuint slot);
+    
+    // Move constructor and assignment for vector storage
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
+    
+    // Delete copy constructor
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
 
+    // Load the texture (called when OpenGL context is ready)
+    void loadTexture();
+    
     void texUnit(Shader& shader, const char* uniform, GLuint unit);
 
     void bind();
@@ -36,7 +49,8 @@ public:
     ~Texture();
 
 private:
-    void createFallbackTexture(); // Create a fallback texture if loading fails
+    bool initialized; // Track if OpenGL object has been created
+    void initializeGL(); // Create the actual OpenGL texture object
 };
 
 #endif

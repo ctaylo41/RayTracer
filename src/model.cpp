@@ -21,9 +21,9 @@ static std::vector<Vertex> assembleVertices(
 }
 
 Model::Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, 
-             const std::vector<glm::vec3>& colors, const std::vector<Texture>& textures, 
+             const std::vector<glm::vec3>& colors, std::vector<Texture>& textures, 
              const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs) :
-    vertices(vertices), indices(indices), colors(colors), textures(textures), 
+    vertices(vertices), indices(indices), colors(colors), textures(std::move(textures)), 
     normals(normals), uvs(uvs), initialized(false)
 {
     // Don't create OpenGL objects in constructor - defer until first draw
@@ -77,7 +77,8 @@ void Model::draw(Shader& shader, Camera& camera) {
             return;
         }
     }
-    vao->bind();
+    shader.activate();
+
     //std::cout << "Drawing Model with VAO ID: " << vao->getID() << std::endl;
     
     // Bind textures
@@ -92,13 +93,14 @@ void Model::draw(Shader& shader, Camera& camera) {
         textures[i].texUnit(shader, uniformName.c_str(), static_cast<GLuint>(i));
     }
 
-    shader.activate();
 
     // Set matrices
     shader.setMat4("view", glm::value_ptr(camera.getViewMatrix()));
     shader.setMat4("projection", glm::value_ptr(camera.getProjectionMatrix()));
     shader.setMat4("model", glm::value_ptr(camera.getModelMatrix()));
     // Draw
+    vao->bind();
+
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
     
     // Check for errors after drawing

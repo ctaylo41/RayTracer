@@ -147,7 +147,7 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
                 }
                 
                 Texture texture(texPath.c_str(), texType, 0);
-                textures.push_back(texture);
+                textures.push_back(std::move(texture));
             }
         }
     }

@@ -17,7 +17,7 @@
 class Model {
 public:
     Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, 
-          const std::vector<glm::vec3>& colors, const std::vector<Texture>& textures, 
+          const std::vector<glm::vec3>& colors, std::vector<Texture>& textures, 
           const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs);
     
     // Add move constructor and move assignment operator
