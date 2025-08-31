@@ -1,6 +1,5 @@
 #include "model.h"
 #include <iostream>
-#include "error.h"
 
 static std::vector<Vertex> assembleVertices(
     const std::vector<glm::vec3>& positions,
@@ -78,9 +77,7 @@ void Model::draw(Shader& shader, Camera& camera) {
             return;
         }
     }
-    checkError("before VAO in Model::draw");
     vao->bind();
-    
     //std::cout << "Drawing Model with VAO ID: " << vao->getID() << std::endl;
     
     // Bind textures

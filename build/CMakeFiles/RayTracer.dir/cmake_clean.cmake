@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/RayTracer.dir/src/VBO.cpp.o.d"
   "CMakeFiles/RayTracer.dir/src/camera.cpp.o"
   "CMakeFiles/RayTracer.dir/src/camera.cpp.o.d"
+  "CMakeFiles/RayTracer.dir/src/error.cpp.o"
+  "CMakeFiles/RayTracer.dir/src/error.cpp.o.d"
   "CMakeFiles/RayTracer.dir/src/main.cpp.o"
   "CMakeFiles/RayTracer.dir/src/main.cpp.o.d"
   "CMakeFiles/RayTracer.dir/src/model.cpp.o"

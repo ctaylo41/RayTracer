@@ -138,6 +138,8 @@ void Texture::bind() {
         return;
     }
     glBindTexture(GL_TEXTURE_2D, ID);
+    checkGLError("binding texture");
+
 }
 
 void Texture::unbind() {

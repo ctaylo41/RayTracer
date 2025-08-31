@@ -249,6 +249,30 @@ src/camera.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/src/camera.cpp.s
 .PHONY : src/camera.cpp.s
 
+src/error.o: src/error.cpp.o
+.PHONY : src/error.o
+
+# target to build an object file
+src/error.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/src/error.cpp.o
+.PHONY : src/error.cpp.o
+
+src/error.i: src/error.cpp.i
+.PHONY : src/error.i
+
+# target to preprocess a source file
+src/error.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/src/error.cpp.i
+.PHONY : src/error.cpp.i
+
+src/error.s: src/error.cpp.s
+.PHONY : src/error.s
+
+# target to generate assembly for a file
+src/error.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RayTracer.dir/build.make CMakeFiles/RayTracer.dir/src/error.cpp.s
+.PHONY : src/error.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -417,6 +441,9 @@ help:
 	@echo "... src/camera.o"
 	@echo "... src/camera.i"
 	@echo "... src/camera.s"
+	@echo "... src/error.o"
+	@echo "... src/error.i"
+	@echo "... src/error.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

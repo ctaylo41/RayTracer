@@ -23,7 +23,8 @@ add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp
                             ${CMAKE_SOURCE_DIR}/src/texture.cpp
                             ${CMAKE_SOURCE_DIR}/src/stb.cpp
                             ${CMAKE_SOURCE_DIR}/src/scene.cpp
-                            ${CMAKE_SOURCE_DIR}/src/model.cpp)
+                            ${CMAKE_SOURCE_DIR}/src/model.cpp
+                            ${CMAKE_SOURCE_DIR}/src/error.cpp)
 
 
 if(NOT GLEW_LIBRARIES)

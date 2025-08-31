@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <string>
+#include "error.h"
 
 enum class TextureType {
     Diffuse,

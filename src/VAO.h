@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include "error.h"
 
 class VertexArrayObject {
 public:
