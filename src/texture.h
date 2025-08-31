@@ -6,31 +6,36 @@
 #include <string>
 
 enum class TextureType {
-	Diffuse,
-	Specular,
-	Normal,
-	Emissive,
-	Metallic,
-	Roughness,
-	Occlusion,
-	Unknown
+    Diffuse,
+    Specular,
+    Normal,
+    Emissive,
+    Metallic,
+    Roughness,
+    Occlusion,
+    Unknown
 };
 
 #include "shader.h"
 
 class Texture {
 public:
-	GLuint ID;
-	TextureType type;
-	GLuint unit;
+    GLuint ID;
+    TextureType type;
+    GLuint unit;
+    bool loaded; // Track if texture loaded successfully
 
-	Texture(const char* image, TextureType texType, GLuint slot);
+    Texture(const char* image, TextureType texType, GLuint slot);
 
-	void texUnit(Shader& shader, const char* uniform, GLuint unit);
+    void texUnit(Shader& shader, const char* uniform, GLuint unit);
 
-	void bind();
-	void unbind();
+    void bind();
+    void unbind();
 
-	~Texture();
+    ~Texture();
+
+private:
+    void createFallbackTexture(); // Create a fallback texture if loading fails
 };
+
 #endif

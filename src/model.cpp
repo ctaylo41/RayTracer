@@ -1,4 +1,6 @@
 #include "model.h"
+#include <iostream>
+#include "error.h"
 
 static std::vector<Vertex> assembleVertices(
     const std::vector<glm::vec3>& positions,
@@ -19,52 +21,100 @@ static std::vector<Vertex> assembleVertices(
     return assembled;
 }
 
-Model::Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, const std::vector<glm::vec3>& colors, const std::vector<Texture>& textures, const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs) :
-    vertices(vertices), indices(indices), colors(colors), textures(textures), normals(normals), uvs(uvs), vao(), ebo(indices), vbo(assembleVertices(vertices, colors, normals, uvs))
+Model::Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, 
+             const std::vector<glm::vec3>& colors, const std::vector<Texture>& textures, 
+             const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs) :
+    vertices(vertices), indices(indices), colors(colors), textures(textures), 
+    normals(normals), uvs(uvs), initialized(false)
 {
+    // Don't create OpenGL objects in constructor - defer until first draw
+    //std::cout << "Model constructor called - deferring OpenGL object creation" << std::endl;
+}
+
+void Model::initializeGL() {
+    if (initialized) return;
     
+    //std::cout << "Initializing OpenGL objects for model..." << std::endl;
+    
+    // Check OpenGL context
+    if (!glfwGetCurrentContext()) {
+        std::cerr << "Error: No OpenGL context when initializing model!" << std::endl;
+        return;
+    }
+    
+    // Assemble vertices
+    std::vector<Vertex> assembledVertices = assembleVertices(vertices, colors, normals, uvs);
+    
+    // Create OpenGL objects in the correct order
+    vao = std::make_unique<VertexArrayObject>();
+    vbo = std::make_unique<VertexBufferObject>(assembledVertices);
+    ebo = std::make_unique<ElementBufferObject>(indices);
+    
+    // Setup vertex attributes
+    vao->bind();
+    vbo->bind();
+    ebo->bind();
+    
+    // Link attributes
+    vao->linkAttrib(*vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, position));
+    vao->linkAttrib(*vbo, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    vao->linkAttrib(*vbo, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    vao->linkAttrib(*vbo, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
+    
+    vao->unbind();
+    vbo->unbind();
+    ebo->unbind();
+    
+    initialized = true;
+    //std::cout << "Model OpenGL objects initialized successfully" << std::endl;
 }
 
 void Model::draw(Shader& shader, Camera& camera) {
-    vao.bind();
-    vbo.bind();
-    ebo.bind();
-
-    vao.linkAttrib(vbo, 0, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, position));
-    vao.linkAttrib(vbo, 1, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    vao.linkAttrib(vbo, 2, 3, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    vao.linkAttrib(vbo, 3, 2, GL_FLOAT, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-
-    shader.activate();
-    // Bind all textures and set their uniforms
+    // Initialize OpenGL objects on first draw
+    if (!initialized) {
+        initializeGL();
+        if (!initialized) {
+            std::cerr << "Failed to initialize OpenGL objects for model!" << std::endl;
+            return;
+        }
+    }
+    checkError("before VAO in Model::draw");
+    vao->bind();
+    
+    //std::cout << "Drawing Model with VAO ID: " << vao->getID() << std::endl;
+    
+    // Bind textures
     for (size_t i = 0; i < textures.size(); ++i) {
-
         std::string uniformName;
         switch (textures[i].type) {
             case TextureType::Diffuse:  uniformName = "diffuseMap"; break;
             case TextureType::Specular: uniformName = "specularMap"; break;
-            // Add other types as needed
             default: uniformName = "texture" + std::to_string(i); break;
         }
-    
         textures[i].bind();
         textures[i].texUnit(shader, uniformName.c_str(), static_cast<GLuint>(i));
-        // Texture parameters should be set during texture creation, not every draw call
     }
 
-    // Unbind textures after drawing
-    for (size_t i = 0; i < textures.size(); ++i) {
-        textures[i].unbind();
-    }
+    shader.activate();
 
+    // Set matrices
     shader.setMat4("view", glm::value_ptr(camera.getViewMatrix()));
     shader.setMat4("projection", glm::value_ptr(camera.getProjectionMatrix()));
     shader.setMat4("model", glm::value_ptr(camera.getModelMatrix()));
-
+    // Draw
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+    
+    // Check for errors after drawing
+    // GLenum err = glGetError();
+    // if (err != GL_NO_ERROR) {
+    //     std::cerr << "OpenGL error after draw: " << err << std::endl;
+    // }
 
-    vao.unbind();
-    vbo.unbind();
-    ebo.unbind();
+    // Cleanup
+    for (auto& texture : textures) {
+        texture.unbind();
+    }
+    
+    vao->unbind();
     shader.deactivate();
 }

@@ -1,6 +1,6 @@
 #include "EBO.h"
 
-ElementBufferObject::ElementBufferObject(const std::vector<unsigned int>& indices) {
+ElementBufferObject::ElementBufferObject(const std::vector<unsigned int>& indices) : indices(indices) {
     //Generate EBO buffer for renderID
     glGenBuffers(1, &renderID);
     //Bind the EBO

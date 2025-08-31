@@ -59,19 +59,21 @@ int main(int, char**){
 
     GLFWwindow* window = glfwCreateWindow(width, height, "Ray Tracer", NULL, NULL);
     glfwMakeContextCurrent(window);
+    if (glfwGetCurrentContext() == nullptr) {
+        std::cout << "No OpenGL context is current!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
     gladLoadGL();
+    if (!gladLoadGL()) {
+        std::cout << "Failed to initialize OpenGL context!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); // Optional: lock cursor
 
-    Scene scene("path/to/your/model.gltf");
     
-    std::string vertexShaderPath = (std::filesystem::current_path().string() +  "/shaders/default.vert");
-    std::string fragmentShaderPath = (std::filesystem::current_path().string() +  "/shaders/default.frag");
-
-    std::cout << "Vertex Shader Path: " << vertexShaderPath << std::endl;
-    std::cout << "Fragment Shader Path: " << fragmentShaderPath << std::endl;
 
     Shader shaderProgram("/Users/colintaylortaylor/Documents/raytracer/src/shaders/default.vert", "/Users/colintaylortaylor/Documents/raytracer/src/shaders/default.frag");
 
@@ -79,6 +81,8 @@ int main(int, char**){
     glDepthFunc(GL_LESS);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+    Scene scene("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/glTF/Sponza.gltf");
+    GLenum err;
     
     Camera camera = scene.getCamera();
     glfwSetWindowUserPointer(window, &camera);
@@ -86,7 +90,7 @@ int main(int, char**){
     float deltaTime = 0.0f; // Time between current frame and last frame
     float lastFrame = 0.0f;
 
-
+    
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
@@ -103,8 +107,9 @@ int main(int, char**){
 
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
 
+        scene.draw(shaderProgram);
+        
 
         glfwSwapBuffers(window);
         glfwPollEvents();

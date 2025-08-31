@@ -5,12 +5,17 @@
 
 #include <glad/glad.h>
 #include <vector>
+#include <string>
+#include <iostream>
 
 class VertexArrayObject {
 public:
     // Constructor and Destructor for VAO
     VertexArrayObject();
     ~VertexArrayObject();
+
+    std::string getID() const;
+
 
     void linkAttrib(VertexBufferObject& VBO, GLuint layout, GLuint numComponents, GLenum type, GLsizeiptr stride, void* offset);
 
@@ -20,7 +25,6 @@ public:
 
 private:
     GLuint renderID;
-    std::vector<float> vertices;
 };
 
 #endif
