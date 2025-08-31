@@ -79,6 +79,7 @@ int main(int, char**){
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glDisable(GL_CULL_FACE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     Scene scene("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/glTF/Sponza.gltf");
     GLenum err;
@@ -107,6 +108,7 @@ int main(int, char**){
             cameraPtr->ProcessKeyboard(RIGHT, deltaTime);
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glFrontFace(GL_CCW);
         scene.draw(shaderProgram);
         glfwSwapBuffers(window);
         glfwPollEvents();

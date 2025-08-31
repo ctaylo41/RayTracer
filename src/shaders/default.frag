@@ -34,7 +34,7 @@ void main() {
     
     // Use vertex color if base color is black/empty (safer check)
     if (baseColor.rgb == vec3(0.0, 0.0, 0.0)) {
-        baseColor.rgb = Color;
+        baseColor.rgb = vec3(0.2,0.2,0.2);
     }
     
     // Handle alpha testing/blending
@@ -82,8 +82,9 @@ void main() {
     // Output final color with alpha
     fragColor = vec4(finalColor, baseColor.a);
     
+
     // Debug modes (uncomment one to debug specific aspects):
-    fragColor = texture(baseColorTexture, TexCoord);
+    //fragColor = texture(baseColorTexture, TexCoord);
     //fragColor = vec4(baseColor.rgb, 1.0);                    // Base color only
     // fragColor = vec4(vec3(metallic), 1.0);                   // Metallic values
     // fragColor = vec4(vec3(roughness), 1.0);                  // Roughness values

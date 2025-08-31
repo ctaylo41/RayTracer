@@ -129,12 +129,12 @@ void Model::draw(Shader& shader, Camera& camera) {
     shader.setFloat("roughnessFactor", material.roughnessFactor);
     shader.setBool("useAlphaBlending", material.alphaMode_MASK);
     // Enable/disable face culling based on doubleSided
-    glEnable(GL_CULL_FACE);
-    // if (material.doubleSided) {
-    //     glDisable(GL_CULL_FACE);
-    // } else {
-    //     glEnable(GL_CULL_FACE);
-    //}
+    
+    if (material.doubleSided) {
+        glDisable(GL_CULL_FACE);
+    } else {
+        glEnable(GL_CULL_FACE);
+    }
     // Draw
     vao->bind();
 

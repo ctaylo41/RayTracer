@@ -12,7 +12,12 @@ Scene::Scene(const char* path) {
 
 bool Scene::loadGLTF(const std::string& path) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | 
+    aiProcess_FlipUVs | 
+    aiProcess_GenNormals |
+    aiProcess_JoinIdenticalVertices |
+    aiProcess_ValidateDataStructure |
+    aiProcess_ImproveCacheLocality);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "Assimp error: " << importer.GetErrorString() << std::endl;
         return false;
@@ -275,7 +280,10 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
     if (material->Get(AI_MATKEY_TWOSIDED, twoSided) == AI_SUCCESS) {
         matProps.doubleSided = (twoSided != 0);
         std::cout << "Double sided: " << matProps.doubleSided << std::endl;
+    } else {
+        matProps.doubleSided = true;  // Force double-sided if not specified
     }
+
 
     // Pass modelMatrix to Model constructor
     return Model(vertices, indices, colors, textures, normals, uvs, modelMatrix, matProps);
