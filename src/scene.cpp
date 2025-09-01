@@ -303,7 +303,29 @@ Camera& Scene::getCamera() {
 
 void Scene::draw(Shader& shader) {
 
+    if(skybox && skyboxShader) {
+        skybox->draw(*skyboxShader, camera);
+    }
+
     for (Model& model : models) {
         model.draw(shader, camera);
     }
+}
+
+void Scene::setSkybox(const std::string& directory) {
+    std::vector<std::string> skyboxFilePaths;
+    for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+        if (entry.is_regular_file()) {
+            skyboxFilePaths.push_back(entry.path().string());
+        }
+    }
+    if (skyboxFilePaths.size() != 6) {
+        std::cerr << "Skybox directory must contain exactly 6 files." << std::endl;
+    }
+    std::sort(skyboxFilePaths.begin(), skyboxFilePaths.end()); // Ensure consistent order
+    skybox = std::make_unique<Skybox>(skyboxFilePaths);
+}
+
+void Scene::setSkyboxShader(const std::string& vertexPath, const std::string& fragmentPath) {
+    skyboxShader = std::make_unique<Shader>(vertexPath.c_str(), fragmentPath.c_str());
 }

@@ -8,6 +8,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "shader.h"
+#include "skybox.h"
 
 class Scene {
 public:
@@ -20,8 +21,13 @@ public:
     bool loadGLTF(const std::string& path);
     void draw(Shader& shader);
 
+    void setSkybox(const std::string& directory);
+    void setSkyboxShader(const std::string& vertexPath, const std::string& fragmentPath);
+
 private:
     std::vector<Model> models;
+    std::unique_ptr<Skybox> skybox;
+    std::unique_ptr<Shader> skyboxShader;
     Camera camera;
     Model assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::string& gltfFilePath);
 };
