@@ -17,3 +17,4 @@ void VertexBufferObject::bind() const {
 void VertexBufferObject::unbind() const {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
+

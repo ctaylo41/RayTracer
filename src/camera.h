@@ -30,6 +30,8 @@ public:
 	glm::mat4 getViewMatrix() const;
 	glm::mat4 getProjectionMatrix() const;
 	glm::mat4 getModelMatrix() const { return modelMatrix; }
+	glm::vec3 getFront() const { return front; }
+	glm::vec3 getPosition() const { return position; }
 
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 	void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);

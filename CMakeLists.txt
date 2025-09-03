@@ -11,7 +11,7 @@ find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 find_package(assimp REQUIRED)
 
-include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include ${ASSIMP_INCLUDE_DIRS})
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLFW_INCLUDE_DIRS} ${GLEW_INCLUDE_DIRS} ${GLM_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/glad/include ${CMAKE_SOURCE_DIR}/include ${ASSIMP_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/imgui ${CMAKE_SOURCE_DIR}/imgui/backends)
 
 add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp 
                             ${CMAKE_SOURCE_DIR}/glad/src/glad.c 
@@ -25,7 +25,17 @@ add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp
                             ${CMAKE_SOURCE_DIR}/src/scene.cpp
                             ${CMAKE_SOURCE_DIR}/src/model.cpp
                             ${CMAKE_SOURCE_DIR}/src/error.cpp
-                            ${CMAKE_SOURCE_DIR}/src/skybox.cpp)
+                            ${CMAKE_SOURCE_DIR}/src/skybox.cpp
+                            ${CMAKE_SOURCE_DIR}/src/light.cpp
+                            ${CMAKE_SOURCE_DIR}/src/lightManager.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/imgui.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/imgui_draw.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/imgui_widgets.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/imgui_tables.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
+                            ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
+                            ${CMAKE_SOURCE_DIR}/src/imGuiLightManager.cpp)
+
 
 
 if(NOT GLEW_LIBRARIES)

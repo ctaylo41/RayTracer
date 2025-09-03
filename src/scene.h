@@ -9,6 +9,7 @@
 #include "assimp/postprocess.h"
 #include "shader.h"
 #include "skybox.h"
+#include "lightManager.h"
 
 class Scene {
 public:
@@ -24,12 +25,21 @@ public:
     void setSkybox(const std::string& directory);
     void setSkyboxShader(const std::string& vertexPath, const std::string& fragmentPath);
 
+    LightManager& getLightManager() { return lightManager; }
+    const LightManager& getLightManager() const { return lightManager; }
+
+    size_t addDirectionalLight(const glm::vec3& direction, const glm::vec3& color = glm::vec3(1.0f), float intensity = 1.0f);
+    size_t addPointLight(const glm::vec3& position, const glm::vec3& color = glm::vec3(1.0f), float intensity = 1.0f);
+    size_t addSpotLight(const glm::vec3& position, const glm::vec3& direction, 
+                       const glm::vec3& color = glm::vec3(1.0f), float intensity = 1.0f,
+                       float innerCutoff = 12.5f, float outerCutoff = 17.5f);
 private:
     std::vector<Model> models;
     std::unique_ptr<Skybox> skybox;
     std::unique_ptr<Shader> skyboxShader;
     Camera camera;
     Model assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::string& gltfFilePath);
+    LightManager lightManager;
 };
 
 #endif // SCENE

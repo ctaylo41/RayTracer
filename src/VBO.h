@@ -10,6 +10,8 @@ struct Vertex {
     glm::vec3 color;
     glm::vec3 normal;
     glm::vec2 uv;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
 };
 
 class VertexBufferObject {
@@ -22,9 +24,12 @@ public:
     void bind() const;
     void unbind() const;
 
+    
+
 private:
     GLuint renderID;
     std::vector<Vertex> vertices;
+    
 };
 
 #endif

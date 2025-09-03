@@ -17,7 +17,8 @@ bool Scene::loadGLTF(const std::string& path) {
     aiProcess_GenNormals |
     aiProcess_JoinIdenticalVertices |
     aiProcess_ValidateDataStructure |
-    aiProcess_ImproveCacheLocality);
+    aiProcess_ImproveCacheLocality | 
+    aiProcess_CalcTangentSpace);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "Assimp error: " << importer.GetErrorString() << std::endl;
         return false;
@@ -76,7 +77,8 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> colors;
-
+    std::vector<glm::vec3> tangents;
+    std::vector<glm::vec3> bitangents;
     // Vertices
     for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
         glm::vec3 vertex;
@@ -283,10 +285,22 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
     } else {
         matProps.doubleSided = true;  // Force double-sided if not specified
     }
+    
+    if (mesh->HasTangentsAndBitangents()) {
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+            glm::vec3 tangent(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+            glm::vec3 bitangent(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+            std::cout << "Tangent " << i << ": (" << tangent.x << ", " << tangent.y << ", " << tangent.z << ")" << std::endl;
+            std::cout << "Bitangent " << i << ": (" << bitangent.x << ", " << bitangent.y << ", " << bitangent.z << ")" << std::endl;
+            tangents.push_back(tangent);
+            bitangents.push_back(bitangent);
+        }
+    }
+
 
 
     // Pass modelMatrix to Model constructor
-    return Model(vertices, indices, colors, textures, normals, uvs, modelMatrix, matProps);
+    return Model(vertices, indices, colors, textures, normals, uvs, tangents, bitangents, modelMatrix, matProps);
 }
 
 void Scene::addModel(Model&& model) { // Accept Model by move
@@ -306,10 +320,15 @@ void Scene::draw(Shader& shader) {
     if(skybox && skyboxShader) {
         skybox->draw(*skyboxShader, camera);
     }
+    shader.activate();
+    lightManager.updateShaderUniforms(shader);
+    glm::vec3 camPos = camera.getPosition();
+    shader.setVec3("cameraPos", glm::value_ptr(camPos));
 
     for (Model& model : models) {
         model.draw(shader, camera);
     }
+    shader.deactivate();
 }
 
 void Scene::setSkybox(const std::string& directory) {
@@ -328,4 +347,16 @@ void Scene::setSkybox(const std::string& directory) {
 
 void Scene::setSkyboxShader(const std::string& vertexPath, const std::string& fragmentPath) {
     skyboxShader = std::make_unique<Shader>(vertexPath.c_str(), fragmentPath.c_str());
+}
+
+size_t Scene::addDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity) {
+    return lightManager.addDirectionalLight(direction, color, intensity);
+}
+
+size_t Scene::addPointLight(const glm::vec3& position, const glm::vec3& color, float intensity) {
+    return lightManager.addPointLight(position, color, intensity);
+}
+
+size_t Scene::addSpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& color, float intensity, float innerCutoff, float outerCutoff) {
+    return lightManager.addSpotLight(position, direction, color, intensity, innerCutoff, outerCutoff);
 }

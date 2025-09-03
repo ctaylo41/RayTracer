@@ -27,8 +27,8 @@ class Model {
 public:
     Model(const std::vector<glm::vec3>& vertices, const std::vector<unsigned int>& indices, 
           const std::vector<glm::vec3>& colors, std::vector<Texture>& textures, 
-          const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs,
-          const glm::mat4x4& modelMatrix, const MaterialProperties& material);
+          const std::vector<glm::vec3>& normals, const std::vector<glm::vec2>& uvs, const std::vector<glm::vec3>& tangents,
+          const std::vector<glm::vec3>& bitangents, const glm::mat4x4& modelMatrix, const MaterialProperties& material);
     
     // Add move constructor and move assignment operator
     Model(Model&& other) noexcept = default;
@@ -45,7 +45,6 @@ private:
     std::unique_ptr<VertexArrayObject> vao;
     std::unique_ptr<VertexBufferObject> vbo;
     std::unique_ptr<ElementBufferObject> ebo;
-    
     // Data storage
     std::vector<glm::vec3> vertices;
     std::vector<unsigned int> indices;
@@ -53,13 +52,15 @@ private:
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> uvs;
     std::vector<glm::vec3> colors;
-
+    std::vector<glm::vec3> tangents;
+    std::vector<glm::vec3> bitangents;
     glm::mat4x4 modelMatrix;
     
     bool initialized;
 
     MaterialProperties material;
-
+    void calculateTangents(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+    void calculateBitangents(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
     void initializeGL();
 };
 
