@@ -5,7 +5,9 @@ static std::vector<Vertex> assembleVertices(
     const std::vector<glm::vec3>& positions,
     const std::vector<glm::vec3>& colors,
     const std::vector<glm::vec3>& normals,
-    const std::vector<glm::vec2>& uvs
+    const std::vector<glm::vec2>& uvs,
+    const std::vector<glm::vec3>& tangents,
+    const std::vector<glm::vec3>& bitangents
 ) {
     std::vector<Vertex> assembled;
     assembled.reserve(positions.size());
@@ -15,8 +17,8 @@ static std::vector<Vertex> assembleVertices(
         vert.color = (i < colors.size()) ? colors[i] : glm::vec3(1.0f);
         vert.normal = (i < normals.size()) ? normals[i] : glm::vec3(0.0f, 0.0f, 1.0f);
         vert.uv = (i < uvs.size()) ? uvs[i] : glm::vec2(0.0f);
-        vert.tangent = glm::vec3(0.0f);
-        vert.bitangent = glm::vec3(0.0f);
+        vert.tangent = (i < tangents.size()) ? tangents[i] : glm::vec3(0.0f);
+        vert.bitangent = (i < bitangents.size()) ? bitangents[i] : glm::vec3(0.0f);
         assembled.push_back(vert);
     }
     return assembled;
@@ -46,8 +48,8 @@ void Model::initializeGL() {
     }
     
     // Assemble vertices
-    std::vector<Vertex> assembledVertices = assembleVertices(vertices, colors, normals, uvs);
-    calculateTangents(assembledVertices, indices);
+    std::vector<Vertex> assembledVertices = assembleVertices(vertices, colors, normals, uvs, tangents, bitangents);
+    //calculateTangents(assembledVertices, indices);
 
     // Create OpenGL objects in the correct order
     vao = std::make_unique<VertexArrayObject>();

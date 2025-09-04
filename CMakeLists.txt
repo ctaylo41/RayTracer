@@ -34,7 +34,10 @@ add_executable(RayTracer    ${CMAKE_SOURCE_DIR}/src/main.cpp
                             ${CMAKE_SOURCE_DIR}/imgui/imgui_tables.cpp
                             ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_glfw.cpp
                             ${CMAKE_SOURCE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
-                            ${CMAKE_SOURCE_DIR}/src/imGuiLightManager.cpp)
+                            ${CMAKE_SOURCE_DIR}/src/imGuiLightManager.cpp
+                            ${CMAKE_SOURCE_DIR}/src/shadowManager.cpp
+                            ${CMAKE_SOURCE_DIR}/src/shadowBuffer.cpp)
+
 
 
 

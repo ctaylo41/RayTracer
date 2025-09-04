@@ -1,9 +1,9 @@
+#include "scene.h"
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <iostream>
 #include <string>
-#include "scene.h"
 #include <filesystem>
 
 Scene::Scene(const char* path) {
@@ -288,12 +288,8 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
     
     if (mesh->HasTangentsAndBitangents()) {
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
-            glm::vec3 tangent(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
-            glm::vec3 bitangent(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
-            std::cout << "Tangent " << i << ": (" << tangent.x << ", " << tangent.y << ", " << tangent.z << ")" << std::endl;
-            std::cout << "Bitangent " << i << ": (" << bitangent.x << ", " << bitangent.y << ", " << bitangent.z << ")" << std::endl;
-            tangents.push_back(tangent);
-            bitangents.push_back(bitangent);
+            tangents.emplace_back(glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z));
+            bitangents.emplace_back(glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
         }
     }
 
@@ -359,4 +355,22 @@ size_t Scene::addPointLight(const glm::vec3& position, const glm::vec3& color, f
 
 size_t Scene::addSpotLight(const glm::vec3& position, const glm::vec3& direction, const glm::vec3& color, float intensity, float innerCutoff, float outerCutoff) {
     return lightManager.addSpotLight(position, direction, color, intensity, innerCutoff, outerCutoff);
+}
+
+void Scene::enableShadowsForLight(size_t lightIndex, unsigned int resolution) {
+    if (lightIndex >= lightManager.getLightCount()) {
+        std::cerr << "Invalid light index: " << lightIndex << std::endl;
+        return;
+    }
+    
+    const Light& light = lightManager.getLight(lightIndex);
+    shadowManager.addShadowMap(lightIndex, light.getType(), resolution);
+}
+
+void Scene::disableShadowsForLight(size_t lightIndex) {
+    shadowManager.removeShadowMap(lightIndex);
+}
+
+void Scene::setSceneBounds(const glm::vec3& center, float radius) {
+    shadowManager.setSceneBounds(center, radius);
 }
