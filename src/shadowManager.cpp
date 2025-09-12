@@ -1,5 +1,5 @@
 #include "shadowManager.h"
-
+#include "scene.h"
 
 ShadowManager::ShadowManager() {
 }
@@ -47,10 +47,16 @@ void ShadowManager::enableShadows(size_t lightIndex, bool enabled) {
 }
 
 void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& scene, Shader& shadowShader) {
+    // Save current OpenGL state
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    
+    // Clear any existing errors
+    while(glGetError() != GL_NO_ERROR);
 
-    shadowShader.activate();
+    std::cout << "Starting shadow map rendering..." << std::endl;
 
     for(auto& shadowInfo : shadowMaps) {
         if(!shadowInfo.enabled || shadowInfo.lightIndex >= lightManager.getLightCount()) {
@@ -61,6 +67,11 @@ void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& sc
         if(!light.getProperties().enabled) {
             continue;
         }
+
+        std::cout << "Rendering shadow for light " << shadowInfo.lightIndex << std::endl;
+
+        // Activate shadow shader for this light
+        shadowShader.activate();
 
         switch (light.getType()) {
             case LightType::Directional:
@@ -73,26 +84,43 @@ void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& sc
                 renderPointLightShadow(light, scene, shadowShader, shadowInfo);
                 break;
         }
+        
+        // Deactivate shadow shader after each light
+        shadowShader.deactivate();
+        
+        // Check for errors
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR) {
+            std::cerr << "OpenGL error after shadow light " << shadowInfo.lightIndex << ": " << error << std::endl;
+        }
     }
 
-    shadowShader.deactivate();
-
+    // Restore OpenGL state
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    glUseProgram(currentProgram);
+    
+    std::cout << "Shadow map rendering complete." << std::endl;
 }
 
 void ShadowManager::renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo) {
+    // Calculate light space matrix
     shadowMapInfo.lightSpaceMatrix = shadowMapInfo.shadowBuffer->getLightSpaceMatrix(light, sceneCenter, sceneRadius);
 
+    // Bind shadow framebuffer
     shadowMapInfo.shadowBuffer->bind();
-
+    
+    // Set shadow shader uniforms
     shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowMapInfo.lightSpaceMatrix));
 
+    // Render each model for shadows ONLY
     for(const Model& model : scene.getModels()) {
         shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
-
-        const_cast<Model&>(model).draw(shadowShader, scene.getCamera());
+        
+        // Use a simple draw that only renders geometry
+        const_cast<Model&>(model).drawGeometryOnly();
     }
 
+    // Unbind shadow framebuffer
     shadowMapInfo.shadowBuffer->unbind();
 }
 
@@ -100,22 +128,20 @@ void ShadowManager::renderSpotLightShadow(const Light& light, Scene& scene, Shad
     shadowInfo.lightSpaceMatrix = shadowInfo.shadowBuffer->getSpotLightMatrix(light);
 
     shadowInfo.shadowBuffer->bind();
-
     shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowInfo.lightSpaceMatrix));
 
     for(const Model& model : scene.getModels()) {
         shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
-
-        const_cast<Model&>(model).draw(shadowShader, scene.getCamera());
+        const_cast<Model&>(model).drawGeometryOnly();
     }
 
     shadowInfo.shadowBuffer->unbind();
 }
 
-void ShadowManager::renderPointLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo)
-{
-    std::cout << "not implemented yets" << std::endl;
+void ShadowManager::renderPointLightShadow(const Light&, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo) {
+    std::cout << "Point light shadows not implemented yet." << std::endl;
 }
+
 
 void ShadowManager::bindShadowMapsForRendering(Shader& shader) {
     shader.activate();

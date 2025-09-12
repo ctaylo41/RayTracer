@@ -374,3 +374,35 @@ void Scene::disableShadowsForLight(size_t lightIndex) {
 void Scene::setSceneBounds(const glm::vec3& center, float radius) {
     shadowManager.setSceneBounds(center, radius);
 }
+
+void Scene::drawWithShadows(Shader& shader, Shader& shadowShader) {
+    // First pass: Render shadow maps
+    shadowManager.renderShadowMaps(lightManager, *this, shadowShader);
+    
+    // Second pass: Render scene with shadows
+    
+    // Draw skybox first (if present)
+    if(skybox && skyboxShader) {
+        skybox->draw(*skyboxShader, camera);
+    }
+    
+    // Activate main shader for scene rendering
+    shader.activate();
+    
+    // Upload light uniforms to the shader
+    lightManager.updateShaderUniforms(shader);
+    
+    // Set camera position for lighting calculations
+    glm::vec3 camPos = camera.getPosition();
+    shader.setVec3("cameraPos", glm::value_ptr(camPos));
+    
+    // Bind shadow maps for use in fragment shader
+    shadowManager.bindShadowMapsForRendering(shader);
+    
+    // Draw all models in the scene
+    for (Model& model : models) {
+        model.draw(shader, camera);
+    }
+    
+    shader.deactivate();
+}

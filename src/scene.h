@@ -10,7 +10,7 @@
 #include "shader.h"
 #include "skybox.h"
 #include "lightManager.h"
-
+#include "shadowManager.h"
 class Scene {
 public:
     Scene(const char* path);

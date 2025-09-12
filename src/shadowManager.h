@@ -7,8 +7,10 @@
 #include <vector>
 #include <memory>
 #include "model.h"
+#include "camera.h"
+
 class Scene;
-class Camera;
+
 struct ShadowMapInfo {
     size_t lightIndex;
     LightType lightType;

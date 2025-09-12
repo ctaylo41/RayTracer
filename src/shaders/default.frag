@@ -28,7 +28,7 @@ uniform float alphaCutoff;
 uniform bool useAlphaBlending;
 
 // Camera position
-uniform vec4 viewPos;
+uniform vec3 cameraPos;
 
 // Shadow mapping uniforms
 struct ShadowMap {
@@ -101,7 +101,7 @@ vec3 getNormalFromMap() {
     return normalize(TBN * tangentNormal);
 }
 
-// Shadow calculation function
+// Shadow calculation function - now takes sampler2D as parameter
 float calculateShadow(vec4 fragPosLightSpace, sampler2D shadowMapTexture, vec3 normal, vec3 lightDir) {
     // Perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
@@ -140,20 +140,17 @@ float calculateShadow(vec4 fragPosLightSpace, sampler2D shadowMapTexture, vec3 n
     return shadow;
 }
 
-// Get shadow factor for a light
+// Get shadow factor for a light - fixed to pass correct sampler
 float getShadowFactor(int lightIndex, vec3 normal, vec3 lightDir) {
     for(int i = 0; i < int(numShadowMaps) && i < 4; i++) {
         if(int(shadowMaps[i].lightIndex) == lightIndex) {
             vec4 fragPosLightSpace = shadowMaps[i].lightSpaceMatrix * vec4(FragPos, 1.0);
             
-            // Select appropriate shadow map texture
-            sampler2D shadowMapTexture;
-            if(i == 0) shadowMapTexture = shadowMap0;
-            else if(i == 1) shadowMapTexture = shadowMap1;
-            else if(i == 2) shadowMapTexture = shadowMap2;
-            else if(i == 3) shadowMapTexture = shadowMap3;
-            
-            return calculateShadow(fragPosLightSpace, shadowMapTexture, normal, lightDir);
+            // Use the correct shadow map based on index
+            if(i == 0) return calculateShadow(fragPosLightSpace, shadowMap0, normal, lightDir);
+            else if(i == 1) return calculateShadow(fragPosLightSpace, shadowMap1, normal, lightDir);
+            else if(i == 2) return calculateShadow(fragPosLightSpace, shadowMap2, normal, lightDir);
+            else if(i == 3) return calculateShadow(fragPosLightSpace, shadowMap3, normal, lightDir);
         }
     }
     return 0.0; // No shadow map found for this light
@@ -278,7 +275,7 @@ void main() {
     
     // Get proper normal (with normal mapping)
     vec3 norm = getNormalFromMap();
-    vec3 viewDir = normalize(viewPos.xyz - FragPos);
+    vec3 viewDir = normalize(cameraPos - FragPos);
     
     // Start with ambient light
     vec3 ambient = 0.3 * baseColor.rgb;

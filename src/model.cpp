@@ -243,3 +243,51 @@ void Model::calculateTangents(std::vector<Vertex>& vertices, const std::vector<u
         }
     }
 }
+
+void Model::drawShadow(Shader& shadowShader) {
+    // Initialize OpenGL objects on first draw
+    if (!initialized) {
+        initializeGL();
+        if (!initialized) {
+            std::cerr << "Failed to initialize OpenGL objects for model!" << std::endl;
+            return;
+        }
+    }
+
+    // Only set the model matrix for shadow rendering
+    shadowShader.setMat4("model", glm::value_ptr(this->getModelMatrix()));
+
+    // Don't bind textures or set material properties for shadow pass
+    
+    // Draw only geometry
+    vao->bind();
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+    vao->unbind();
+}
+
+void Model::drawGeometryOnly() {
+    // Initialize OpenGL objects on first draw
+    if (!initialized) {
+        initializeGL();
+        if (!initialized) {
+            std::cerr << "Failed to initialize OpenGL objects for model!" << std::endl;
+            return;
+        }
+    }
+
+    // This method ONLY draws geometry - no texture binding, no uniform setting
+    // Assumes shader is already active and model matrix is already set
+    
+    // Handle face culling
+    if (material.doubleSided) {
+        glDisable(GL_CULL_FACE);
+    } else {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+    }
+    
+    // Draw geometry
+    vao->bind();
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+    vao->unbind();
+}
