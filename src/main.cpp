@@ -54,13 +54,35 @@ void setupSponzaLightingWithShadows(Scene& scene) {
     
     // Set scene bounds for proper shadow map calculation
     // Adjust these values based on your Sponza model size
-    scene.setSceneBounds(glm::vec3(0.0f, 5.0f, 0.0f), 25.0f);
+    scene.setSceneBounds(scene.getSceneCenter(), scene.getSceneRadius());
+
     
     std::cout << "Sponza lighting with shadows setup complete!" << std::endl;
     std::cout << "Lights added: " << scene.getLightManager().getLightCount() << std::endl;
     std::cout << "Shadow maps created: " << scene.getShadowManager().getShadowMapCount() << std::endl;
 }
 
+void setupSponzaLightingWithShadowsDebug(Scene& scene) {
+    // Clear any existing lights first
+    scene.getLightManager().removeAllLights();
+    
+    // Add only ONE simple directional light
+    size_t mainLightIndex = scene.addDirectionalLight(
+        glm::vec3(0.0f, -1.0f, 0.0f),  // Simple straight-down light
+        glm::vec3(1.0f, 1.0f, 1.0f),   // White light
+        2.0f                           // Intensity
+    );
+    
+    // Enable shadows for just this one light
+    scene.enableShadowsForLight(mainLightIndex, 2048);
+    
+    // Set scene bounds
+    scene.setSceneBounds(glm::vec3(0.0f, 5.0f, 0.0f), 50.0f);
+    
+    std::cout << "Simple overhead light setup complete!" << std::endl;
+    std::cout << "Lights: " << scene.getLightManager().getLightCount() << std::endl;
+    std::cout << "Shadow maps: " << scene.getShadowManager().getShadowMapCount() << std::endl;
+}
 
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -133,7 +155,7 @@ int main(int, char**){
 
     scene.setSkybox("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/skybox");
     scene.setSkyboxShader("/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.vert", "/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.frag");
-    setupSponzaLightingWithShadows(scene);
+    setupSponzaLightingWithShadowsDebug(scene);
 
     Camera& camera = scene.getCamera();
     ImGuiLightManager lightUI(scene.getLightManager(), camera);

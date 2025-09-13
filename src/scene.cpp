@@ -6,6 +6,8 @@
 #include <string>
 #include <filesystem>
 
+
+
 Scene::Scene(const char* path) {
     loadGLTF(path);
 }
@@ -67,6 +69,18 @@ bool Scene::loadGLTF(const std::string& path) {
         setCamera(cam);
     }
 
+    calculatedSceneCenter = (loadingBounds.min + loadingBounds.max) * 0.5f;
+    glm::vec3 extent = loadingBounds.max - loadingBounds.min;
+    calculatedSceneRadius = glm::length(extent) * 0.5f;
+    sceneBoundsCalculated = true;
+    
+    std::cout << "=== Scene Bounds from glTF ===" << std::endl;
+    std::cout << "Min: (" << loadingBounds.min.x << ", " << loadingBounds.min.y << ", " << loadingBounds.min.z << ")" << std::endl;
+    std::cout << "Max: (" << loadingBounds.max.x << ", " << loadingBounds.max.y << ", " << loadingBounds.max.z << ")" << std::endl;
+    std::cout << "Center: (" << calculatedSceneCenter.x << ", " << calculatedSceneCenter.y << ", " << calculatedSceneCenter.z << ")" << std::endl;
+    std::cout << "Radius: " << calculatedSceneRadius << std::endl;
+
+
     return true;
 }
 
@@ -86,6 +100,16 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
         vertex.y = mesh->mVertices[i].y;
         vertex.z = mesh->mVertices[i].z;
         vertices.push_back(vertex);
+
+        loadingBounds.min.x = std::min(loadingBounds.min.x, vertex.x);
+        loadingBounds.min.y = std::min(loadingBounds.min.y, vertex.y);
+        loadingBounds.min.z = std::min(loadingBounds.min.z, vertex.z);
+        
+        loadingBounds.max.x = std::max(loadingBounds.max.x, vertex.x);
+        loadingBounds.max.y = std::max(loadingBounds.max.y, vertex.y);
+        loadingBounds.max.z = std::max(loadingBounds.max.z, vertex.z);
+
+
     }
 
     // Indices
@@ -405,4 +429,52 @@ void Scene::drawWithShadows(Shader& shader, Shader& shadowShader) {
     }
     
     shader.deactivate();
+}
+
+void Scene::calculateSceneBounds() {
+    sceneMin = glm::vec3(FLT_MAX);
+    sceneMax = glm::vec3(-FLT_MAX);
+    
+    for (const auto& model : models) {
+        // Get model's vertices and transform them by model matrix
+        const auto& vertices = model.getVertices(); // You'll need to add this getter
+        glm::mat4 modelMatrix = model.getModelMatrix();
+        
+        for (const auto& vertex : vertices) {
+            // Transform vertex position by model matrix
+            glm::vec4 worldPos = modelMatrix * glm::vec4(vertex, 1.0f);
+            glm::vec3 pos = glm::vec3(worldPos);
+            
+            // Update min/max bounds
+            sceneMin.x = std::min(sceneMin.x, pos.x);
+            sceneMin.y = std::min(sceneMin.y, pos.y);
+            sceneMin.z = std::min(sceneMin.z, pos.z);
+            
+            sceneMax.x = std::max(sceneMax.x, pos.x);
+            sceneMax.y = std::max(sceneMax.y, pos.y);
+            sceneMax.z = std::max(sceneMax.z, pos.z);
+        }
+    }
+    
+    // Calculate center and radius
+    calculatedSceneCenter = (sceneMin + sceneMax) * 0.5f;
+    glm::vec3 extent = sceneMax - sceneMin;
+    calculatedSceneRadius = glm::length(extent) * 0.5f;
+    
+    sceneBoundsCalculated = true;
+    
+    std::cout << "=== Calculated Scene Bounds ===" << std::endl;
+    std::cout << "Min: (" << sceneMin.x << ", " << sceneMin.y << ", " << sceneMin.z << ")" << std::endl;
+    std::cout << "Max: (" << sceneMax.x << ", " << sceneMax.y << ", " << sceneMax.z << ")" << std::endl;
+    std::cout << "Center: (" << calculatedSceneCenter.x << ", " << calculatedSceneCenter.y << ", " << calculatedSceneCenter.z << ")" << std::endl;
+    std::cout << "Radius: " << calculatedSceneRadius << std::endl;
+}
+
+void Scene::printSceneBounds() const {
+    if (sceneBoundsCalculated) {
+        std::cout << "Scene Center: (" << calculatedSceneCenter.x << ", " << calculatedSceneCenter.y << ", " << calculatedSceneCenter.z << ")" << std::endl;
+        std::cout << "Scene Radius: " << calculatedSceneRadius << std::endl;
+    } else {
+        std::cout << "Scene bounds not calculated yet!" << std::endl;
+    }
 }

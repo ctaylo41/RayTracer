@@ -103,41 +103,60 @@ vec3 getNormalFromMap() {
 
 // Shadow calculation function - now takes sampler2D as parameter
 float calculateShadow(vec4 fragPosLightSpace, sampler2D shadowMapTexture, vec3 normal, vec3 lightDir) {
-    // Perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     
     // Transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     
-    // Get closest depth value from light's perspective
-    float closestDepth = texture(shadowMapTexture, projCoords.xy).r;
-    
-    // Get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    
-    // Calculate bias to prevent shadow acne
-    float bias = max(shadowBias * (1.0 - dot(normal, lightDir)), shadowBias * 0.1);
-    
-    // Check whether current frag pos is in shadow
-    // PCF (Percentage Closer Filtering) for soft shadows
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadowMapTexture, 0);
-    int pcfSamples = int(shadowSoftness);
-    
-    for(int x = -pcfSamples; x <= pcfSamples; ++x) {
-        for(int y = -pcfSamples; y <= pcfSamples; ++y) {
-            float pcfDepth = texture(shadowMapTexture, projCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
+    // Check if we're outside the shadow map bounds
+    if(projCoords.x < 0.0 || projCoords.x > 1.0 || 
+       projCoords.y < 0.0 || projCoords.y > 1.0 || 
+       projCoords.z > 1.0) {
+        return 0.0; // No shadow if outside bounds
     }
     
-    shadow /= pow(2.0 * pcfSamples + 1.0, 2.0);
+    // Sample the shadow map
+    float closestDepth = texture(shadowMapTexture, projCoords.xy).r;
+    float currentDepth = projCoords.z;
     
-    // Keep shadow at 0.0 when outside the far plane region of the light's frustum
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
+    // Simple shadow test with minimal bias
+    return currentDepth > closestDepth + 0.001 ? 0.7 : 0.0;
+
+    // Perform perspective divide
+    // vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     
-    return shadow;
+    // // Transform to [0,1] range
+    // projCoords = projCoords * 0.5 + 0.5;
+    
+    // // Get closest depth value from light's perspective
+    // float closestDepth = texture(shadowMapTexture, projCoords.xy).r;
+    
+    // // Get depth of current fragment from light's perspective
+    // float currentDepth = projCoords.z;
+    
+    // // Calculate bias to prevent shadow acne
+    // float bias = max(shadowBias * (1.0 - dot(normal, lightDir)), shadowBias * 0.1);
+    
+    // // Check whether current frag pos is in shadow
+    // // PCF (Percentage Closer Filtering) for soft shadows
+    // float shadow = 0.0;
+    // vec2 texelSize = 1.0 / textureSize(shadowMapTexture, 0);
+    // int pcfSamples = int(shadowSoftness);
+    
+    // for(int x = -pcfSamples; x <= pcfSamples; ++x) {
+    //     for(int y = -pcfSamples; y <= pcfSamples; ++y) {
+    //         float pcfDepth = texture(shadowMapTexture, projCoords.xy + vec2(x, y) * texelSize).r;
+    //         shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+    //     }
+    // }
+    
+    // shadow /= pow(2.0 * pcfSamples + 1.0, 2.0);
+    
+    // // Keep shadow at 0.0 when outside the far plane region of the light's frustum
+    // if(projCoords.z > 1.0)
+    //     shadow = 0.0;
+    
+    // return shadow;
 }
 
 // Get shadow factor for a light - fixed to pass correct sampler

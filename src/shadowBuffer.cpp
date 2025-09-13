@@ -49,9 +49,15 @@ void ShadowBuffer::initializeFramebuffer() {
 }
 
 void ShadowBuffer::bind() {
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
     glViewport(0, 0, shadowWidth, shadowHeight);
     glClear(GL_DEPTH_BUFFER_BIT);
+    
+    // DEBUG: Verify settings
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    std::cout << "Shadow viewport: " << viewport[2] << "x" << viewport[3] << std::endl;
+
 }
 
 void ShadowBuffer::unbind() {
@@ -65,19 +71,71 @@ void ShadowBuffer::bindTexture(unsigned int unit) {
 
 glm::mat4 ShadowBuffer::getLightSpaceMatrix(const Light& light, const glm::vec3& sceneCenter, float sceneRadius) {
     if(light.getType() != LightType::Directional) {
-        std::cerr << "getLightSpaceMatrix is only valid for directional lights." << std::endl;
         return glm::mat4(1.0f);
     }
 
     const LightProperties& props = light.getProperties();
+    glm::vec3 lightDir = glm::normalize(props.direction);
+if (glm::length(lightDir) < 0.001f) lightDir = glm::vec3(-1, -1, -1); // fallback
 
-    float orthoSize = sceneRadius * 2.0f;
-    glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize * 2.0f, orthoSize * 2.0f);
+glm::vec3 up = glm::abs(lightDir.y) > 0.99f ? glm::vec3(0,0,1) : glm::vec3(0,1,0);
 
-    glm::vec3 lightPos = sceneCenter - props.direction * sceneRadius;
-    glm::mat4 lightView = glm::lookAt(lightPos, sceneCenter, glm::vec3(0.0f, 1.0f, 0.0f));
-    return lightProjection * lightView;
+float lightDistance = sceneRadius * 2.0f;
+glm::vec3 lightPos = sceneCenter - lightDir * lightDistance;
+
+glm::mat4 lightView = glm::lookAt(lightPos, sceneCenter, up);
+
+float orthoSize = sceneRadius * 1.2f;
+float nearPlane = 0.1f;
+float farPlane = lightDistance + sceneRadius;
+
+glm::mat4 lightProjection = glm::ortho(
+    -orthoSize, orthoSize,
+    -orthoSize, orthoSize,
+    nearPlane, farPlane
+);
+
+glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+    return lightSpaceMatrix;
+
+
+    // if(light.getType() != LightType::Directional) {
+    //     return glm::mat4(1.0f);
+    // }
+
+    // const LightProperties& props = light.getProperties();
+    // glm::vec3 lightDir = glm::normalize(props.direction);
+    
+    // // Position the light much further back
+    // glm::vec3 lightPos = sceneCenter - lightDir * (sceneRadius * 4.0f);
+    
+    // // Create a proper up vector
+    // glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    // glm::vec3 up = worldUp;
+    
+    // // If light direction is too close to up vector, use a different up
+    // if (glm::abs(glm::dot(glm::normalize(lightDir), worldUp)) > 0.95f) {
+    //     up = glm::vec3(0.0f, 0.0f, 1.0f);
+    // }
+    
+    // // Create view matrix
+    // glm::mat4 lightView = glm::lookAt(lightPos, sceneCenter, up);
+    
+    // // Create projection matrix with proper bounds
+    // float left = -sceneRadius * 2.0f;
+    // float right = sceneRadius * 2.0f;
+    // float bottom = -sceneRadius * 2.0f;
+    // float top = sceneRadius * 2.0f;
+    // float nearPlane = 1.0f;
+    // float farPlane = sceneRadius * 8.0f;
+    
+    // glm::mat4 lightProjection = glm::ortho(left, right, bottom, top, nearPlane, farPlane);
+    
+    // return lightProjection * lightView;
 }
+
+
 
 glm::mat4 ShadowBuffer::getSpotLightMatrix(const Light& light, float nearPlane, float farPlane) {
     if(light.getType() != LightType::Spot) {

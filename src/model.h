@@ -42,6 +42,7 @@ public:
     MaterialProperties getMaterialProperties() const { return material; }
     void drawShadow(Shader& shadowShader);
     void drawGeometryOnly();
+    const std::vector<glm::vec3>& getVertices() const { return vertices; }
 private:
     // Use smart pointers to manage OpenGL objects
     std::unique_ptr<VertexArrayObject> vao;

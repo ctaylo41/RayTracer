@@ -1,8 +1,11 @@
 #include "shadowManager.h"
 #include "scene.h"
 
-ShadowManager::ShadowManager() {
+ShadowManager::ShadowManager() : shadowBias(0.005f), shadowSoftness(1.0f) {
+    sceneCenter = glm::vec3(0.0f);
+    sceneRadius = 50.0f;
 }
+
 
 ShadowManager::~ShadowManager() {
 }
@@ -103,8 +106,15 @@ void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& sc
 }
 
 void ShadowManager::renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo) {
-    // Calculate light space matrix
     shadowMapInfo.lightSpaceMatrix = shadowMapInfo.shadowBuffer->getLightSpaceMatrix(light, sceneCenter, sceneRadius);
+
+    // DEBUG: Print the matrix values
+    glm::mat4 matrix = shadowMapInfo.lightSpaceMatrix;
+    std::cout << "=== Light Space Matrix ===" << std::endl;
+    for(int i = 0; i < 4; i++) {
+        std::cout << "[" << matrix[i][0] << ", " << matrix[i][1] << ", " << matrix[i][2] << ", " << matrix[i][3] << "]" << std::endl;
+    }
+    // Calculate light space matrix
 
     // Bind shadow framebuffer
     shadowMapInfo.shadowBuffer->bind();
@@ -146,31 +156,35 @@ void ShadowManager::renderPointLightShadow(const Light&, Scene& scene, Shader& s
 void ShadowManager::bindShadowMapsForRendering(Shader& shader) {
     shader.activate();
     
-    // Set shadow parameters
     shader.setFloat("shadowBias", shadowBias);
     shader.setFloat("shadowSoftness", shadowSoftness);
 
-    int textureUnit = 10; // Start shadow maps at texture unit 10
     int shadowMapCount = 0;
     
     for (const auto& shadowInfo : shadowMaps) {
-        if (!shadowInfo.enabled || shadowMapCount >= 4) { // Limit to 4 shadow maps for now
+        if (!shadowInfo.enabled || shadowMapCount >= 4) {
             continue;
         }
         
+        // Bind to texture units 10, 11, 12, 13 for shadow maps
+        int textureUnit = 10 + shadowMapCount;
         shadowInfo.shadowBuffer->bindTexture(textureUnit);
+        
+        // Set the uniform for the specific shadow map sampler
+        std::string samplerName = "shadowMap" + std::to_string(shadowMapCount);
+        shader.setFloat(samplerName.c_str(), static_cast<float>(textureUnit));
         
         std::string uniformBase = "shadowMaps[" + std::to_string(shadowMapCount) + "]";
         shader.setFloat((uniformBase + ".textureUnit").c_str(), static_cast<float>(textureUnit));
         shader.setFloat((uniformBase + ".lightIndex").c_str(), static_cast<float>(shadowInfo.lightIndex));
         shader.setMat4((uniformBase + ".lightSpaceMatrix").c_str(), glm::value_ptr(shadowInfo.lightSpaceMatrix));
 
-        textureUnit++;
         shadowMapCount++;
     }
 
     shader.setFloat("numShadowMaps", static_cast<float>(shadowMapCount));
 }
+
 
 const char* getLightTypeName(LightType type) {
     switch (type) {

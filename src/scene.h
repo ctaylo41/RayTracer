@@ -11,6 +11,12 @@
 #include "skybox.h"
 #include "lightManager.h"
 #include "shadowManager.h"
+
+struct SceneBounds {
+    glm::vec3 min = glm::vec3(FLT_MAX);
+    glm::vec3 max = glm::vec3(-FLT_MAX);
+};
+
 class Scene {
 public:
     Scene(const char* path);
@@ -42,6 +48,10 @@ public:
     void enableShadowsForLight(size_t lightIndex, unsigned int resolution = 2048);
     void disableShadowsForLight(size_t lightIndex);
     void setSceneBounds(const glm::vec3& center, float radius);
+    void calculateSceneBounds();
+    glm::vec3 getSceneCenter() const { return calculatedSceneCenter; }
+    float getSceneRadius() const { return calculatedSceneRadius; }
+    void printSceneBounds() const;
 
 private:
     std::vector<Model> models;
@@ -51,6 +61,13 @@ private:
     Model assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::string& gltfFilePath);
     LightManager lightManager;
     ShadowManager shadowManager;
+    glm::vec3 sceneMin = glm::vec3(FLT_MAX);
+    glm::vec3 sceneMax = glm::vec3(-FLT_MAX);
+    glm::vec3 calculatedSceneCenter;
+    float calculatedSceneRadius;
+    bool sceneBoundsCalculated = false;
+    SceneBounds loadingBounds;
+
 };
 
 #endif // SCENE
