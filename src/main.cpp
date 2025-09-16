@@ -31,56 +31,33 @@ bool firstMouse = true;
 
 // Each face has its own vertices and UVs for proper texture repetition
 
+
 void setupSponzaLightingWithShadows(Scene& scene) {
-    // Main sun light - directional light from above at an angle
+    // Clear existing lights
+    scene.getLightManager().removeAllLights();
+    
+    std::cout << "=== Setting up Sponza lighting with camera-based shadows ===" << std::endl;
+    
+    // Add a simple directional light
     size_t mainLightIndex = scene.addDirectionalLight(
-        glm::normalize(glm::vec3(0.3f, -0.8f, 0.5f)), // Direction (sun angle)
-        glm::vec3(1.0f, 0.95f, 0.8f),                 // Warm sunlight color
+        glm::normalize(glm::vec3(0.3f, -0.8f, 0.5f)), // Sun-like direction
+        glm::vec3(1.0f, 0.95f, 0.8f),                 // Warm sunlight
         2.0f                                           // Intensity
     );
     
-    // Enable shadows for the main directional light
-    scene.enableShadowsForLight(mainLightIndex, 4096); // High resolution for primary light
-    
-    // Add a secondary directional light with lower intensity
-    size_t fillLightIndex = scene.addDirectionalLight(
-        glm::normalize(glm::vec3(-0.2f, -0.3f, -0.8f)), // Different direction
-        glm::vec3(0.4f, 0.6f, 1.0f),                    // Cool blue fill
-        0.3f                                             // Lower intensity
-    );
-    
-    // Optionally enable shadows for fill light too
-    scene.enableShadowsForLight(fillLightIndex, 2048);
-    
-    // Set scene bounds for proper shadow map calculation
-    // Adjust these values based on your Sponza model size
-    scene.setSceneBounds(scene.getSceneCenter(), scene.getSceneRadius());
-
-    
-    std::cout << "Sponza lighting with shadows setup complete!" << std::endl;
-    std::cout << "Lights added: " << scene.getLightManager().getLightCount() << std::endl;
-    std::cout << "Shadow maps created: " << scene.getShadowManager().getShadowMapCount() << std::endl;
-}
-
-void setupSponzaLightingWithShadowsDebug(Scene& scene) {
-    // Clear any existing lights first
-    scene.getLightManager().removeAllLights();
-    
-    // Add only ONE simple directional light
-    size_t mainLightIndex = scene.addDirectionalLight(
-        glm::vec3(0.0f, -1.0f, 0.0f),  // Simple straight-down light
-        glm::vec3(1.0f, 1.0f, 1.0f),   // White light
-        2.0f                           // Intensity
-    );
-    
-    // Enable shadows for just this one light
+    // Enable shadows - no need to set scene bounds, it will use the camera
     scene.enableShadowsForLight(mainLightIndex, 2048);
     
-    // Set scene bounds
-    scene.setSceneBounds(glm::vec3(0.0f, 5.0f, 0.0f), 50.0f);
+    // Add a fill light (optional)
+    size_t fillLightIndex = scene.addDirectionalLight(
+        glm::normalize(glm::vec3(-0.2f, -0.3f, -0.8f)),
+        glm::vec3(0.4f, 0.6f, 1.0f),                    // Cool fill light
+        0.3f
+    );
     
-    std::cout << "Simple overhead light setup complete!" << std::endl;
-    std::cout << "Lights: " << scene.getLightManager().getLightCount() << std::endl;
+    std::cout << "Lighting setup complete!" << std::endl;
+    std::cout << "Main light index: " << mainLightIndex << std::endl;
+    std::cout << "Fill light index: " << fillLightIndex << std::endl;
     std::cout << "Shadow maps: " << scene.getShadowManager().getShadowMapCount() << std::endl;
 }
 
@@ -155,7 +132,7 @@ int main(int, char**){
 
     scene.setSkybox("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/skybox");
     scene.setSkyboxShader("/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.vert", "/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.frag");
-    setupSponzaLightingWithShadowsDebug(scene);
+    setupSponzaLightingWithShadows(scene);
 
     Camera& camera = scene.getCamera();
     ImGuiLightManager lightUI(scene.getLightManager(), camera);

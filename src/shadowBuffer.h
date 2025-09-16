@@ -1,3 +1,4 @@
+// shadowBuffer.h - Updated interface to accept camera
 #ifndef SHADOW_BUFFER_H
 #define SHADOW_BUFFER_H
 
@@ -7,6 +8,7 @@
 #include <memory>
 #include "shader.h"
 #include "light.h"
+#include "camera.h" // Add camera include
 
 class ShadowBuffer {
 public:
@@ -20,10 +22,13 @@ public:
     void unbind();
     void bindTexture(unsigned int unit);
 
-    glm::mat4 getLightSpaceMatrix(const Light& light, const glm::vec3& sceneCenter, float sceneRadius);
+    // Updated to use camera frustum for better shadow map bounds
+    glm::mat4 getLightSpaceMatrix(const Light& light, const Camera& camera);
+    
+    // Alternative using explicit bounds
+    glm::mat4 getLightSpaceMatrixForBounds(const Light& light, const glm::vec3& sceneMin, const glm::vec3& sceneMax);
 
     std::vector<glm::mat4> getPointLightMatrices(const Light& light, float nearPlane = 0.1f, float farPlane = 100.0f);
-
     glm::mat4 getSpotLightMatrix(const Light& light, float nearPlane = 0.1f, float farPlane = 100.0f);
 
     GLuint getDepthMap() const { return depthMap; }
@@ -38,6 +43,9 @@ private:
     GLuint depthMap;
 
     void initializeFramebuffer();
+    
+    // Helper function to calculate frustum corners
+    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view);
 };
 
 #endif

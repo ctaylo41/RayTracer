@@ -381,15 +381,6 @@ size_t Scene::addSpotLight(const glm::vec3& position, const glm::vec3& direction
     return lightManager.addSpotLight(position, direction, color, intensity, innerCutoff, outerCutoff);
 }
 
-void Scene::enableShadowsForLight(size_t lightIndex, unsigned int resolution) {
-    if (lightIndex >= lightManager.getLightCount()) {
-        std::cerr << "Invalid light index: " << lightIndex << std::endl;
-        return;
-    }
-    
-    const Light& light = lightManager.getLight(lightIndex);
-    shadowManager.addShadowMap(lightIndex, light.getType(), resolution);
-}
 
 void Scene::disableShadowsForLight(size_t lightIndex) {
     shadowManager.removeShadowMap(lightIndex);
@@ -399,37 +390,6 @@ void Scene::setSceneBounds(const glm::vec3& center, float radius) {
     shadowManager.setSceneBounds(center, radius);
 }
 
-void Scene::drawWithShadows(Shader& shader, Shader& shadowShader) {
-    // First pass: Render shadow maps
-    shadowManager.renderShadowMaps(lightManager, *this, shadowShader);
-    
-    // Second pass: Render scene with shadows
-    
-    // Draw skybox first (if present)
-    if(skybox && skyboxShader) {
-        skybox->draw(*skyboxShader, camera);
-    }
-    
-    // Activate main shader for scene rendering
-    shader.activate();
-    
-    // Upload light uniforms to the shader
-    lightManager.updateShaderUniforms(shader);
-    
-    // Set camera position for lighting calculations
-    glm::vec3 camPos = camera.getPosition();
-    shader.setVec3("cameraPos", glm::value_ptr(camPos));
-    
-    // Bind shadow maps for use in fragment shader
-    shadowManager.bindShadowMapsForRendering(shader);
-    
-    // Draw all models in the scene
-    for (Model& model : models) {
-        model.draw(shader, camera);
-    }
-    
-    shader.deactivate();
-}
 
 void Scene::calculateSceneBounds() {
     sceneMin = glm::vec3(FLT_MAX);
@@ -477,4 +437,49 @@ void Scene::printSceneBounds() const {
     } else {
         std::cout << "Scene bounds not calculated yet!" << std::endl;
     }
+}
+
+void Scene::drawWithShadows(Shader& shader, Shader& shadowShader) {
+    // First pass: Render shadow maps using the camera
+    shadowManager.renderShadowMaps(lightManager, *this, shadowShader, camera);
+    
+    // Second pass: Render scene with shadows
+    
+    // Draw skybox first (if present)
+    if(skybox && skyboxShader) {
+        skybox->draw(*skyboxShader, camera);
+    }
+    
+    // Activate main shader for scene rendering
+    shader.activate();
+    
+    // Upload light uniforms to the shader
+    lightManager.updateShaderUniforms(shader);
+    
+    // Set camera position for lighting calculations
+    glm::vec3 camPos = camera.getPosition();
+    shader.setVec3("cameraPos", glm::value_ptr(camPos));
+    
+    // Bind shadow maps for use in fragment shader
+    shadowManager.bindShadowMapsForRendering(shader);
+    
+    // Draw all models in the scene
+    for (Model& model : models) {
+        model.draw(shader, camera);
+    }
+    
+    shader.deactivate();
+}
+
+// Remove the setSceneBounds requirement from shadow setup since we're using camera now
+void Scene::enableShadowsForLight(size_t lightIndex, unsigned int resolution) {
+    if (lightIndex >= lightManager.getLightCount()) {
+        std::cerr << "Invalid light index: " << lightIndex << std::endl;
+        return;
+    }
+    
+    const Light& light = lightManager.getLight(lightIndex);
+    shadowManager.addShadowMap(lightIndex, light.getType(), resolution);
+    
+    std::cout << "Enabled shadows for light " << lightIndex << " (camera-based bounds)" << std::endl;
 }

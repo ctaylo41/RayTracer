@@ -1,3 +1,4 @@
+// shadowManager.h - Updated interface
 #ifndef SHADOW_MANAGER
 #define SHADOW_MANAGER
 
@@ -32,39 +33,40 @@ public:
     void removeShadowMap(size_t lightIndex);
     void clearAllShadowMaps();
 
-    void renderShadowMaps(const LightManager& lightManager, Scene& scene, Shader& shadowShader);
+    // Updated to use camera
+    void renderShadowMaps(const LightManager& lightManager, Scene& scene, Shader& shadowShader, const Camera& camera);
 
     void bindShadowMapsForRendering(Shader& mainShader);
-
     void enableShadows(size_t lightIndex, bool enabled);
 
-    void setShadowBias(float bias ) { shadowBias = bias;}
+    void setShadowBias(float bias) { shadowBias = bias; }
     void setShadowSoftness(float softness) { shadowSoftness = softness; }
-
 
     float getShadowBias() const { return shadowBias; }
     float getShadowSoftness() const { return shadowSoftness; }
-
     size_t getShadowMapCount() const { return shadowMaps.size(); }
 
-
+    // Keep these for backward compatibility if needed
     void setSceneBounds(const glm::vec3& center, float radius) {
         sceneCenter = center;
         sceneRadius = radius;
     }
+
 private:
     std::vector<ShadowMapInfo> shadowMaps;
     float shadowBias;
     float shadowSoftness;
 
+    // Keep these as fallback
     glm::vec3 sceneCenter = glm::vec3(0.0f);
     float sceneRadius = 50.0f;
 
     ShadowMapInfo* findShadowMap(size_t lightIndex);
-    void renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo);
-    void renderSpotLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo);
-    void renderPointLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo);
-
+    
+    // Updated to use camera
+    void renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo, const Camera& camera);
+    void renderSpotLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo, const Camera& camera);
+    void renderPointLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo, const Camera& camera);
 };
 
 #endif // SHADOW_MANAGER

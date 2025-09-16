@@ -49,109 +49,6 @@ void ShadowManager::enableShadows(size_t lightIndex, bool enabled) {
     }
 }
 
-void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& scene, Shader& shadowShader) {
-    // Save current OpenGL state
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    GLint currentProgram;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
-    
-    // Clear any existing errors
-    while(glGetError() != GL_NO_ERROR);
-
-    std::cout << "Starting shadow map rendering..." << std::endl;
-
-    for(auto& shadowInfo : shadowMaps) {
-        if(!shadowInfo.enabled || shadowInfo.lightIndex >= lightManager.getLightCount()) {
-            continue;
-        }
-
-        const Light& light = lightManager.getLight(shadowInfo.lightIndex);
-        if(!light.getProperties().enabled) {
-            continue;
-        }
-
-        std::cout << "Rendering shadow for light " << shadowInfo.lightIndex << std::endl;
-
-        // Activate shadow shader for this light
-        shadowShader.activate();
-
-        switch (light.getType()) {
-            case LightType::Directional:
-                renderDirectionalLightShadow(light, scene, shadowShader, shadowInfo);
-                break;
-            case LightType::Spot:
-                renderSpotLightShadow(light, scene, shadowShader, shadowInfo);
-                break;
-            case LightType::Point:
-                renderPointLightShadow(light, scene, shadowShader, shadowInfo);
-                break;
-        }
-        
-        // Deactivate shadow shader after each light
-        shadowShader.deactivate();
-        
-        // Check for errors
-        GLenum error = glGetError();
-        if (error != GL_NO_ERROR) {
-            std::cerr << "OpenGL error after shadow light " << shadowInfo.lightIndex << ": " << error << std::endl;
-        }
-    }
-
-    // Restore OpenGL state
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-    glUseProgram(currentProgram);
-    
-    std::cout << "Shadow map rendering complete." << std::endl;
-}
-
-void ShadowManager::renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo) {
-    shadowMapInfo.lightSpaceMatrix = shadowMapInfo.shadowBuffer->getLightSpaceMatrix(light, sceneCenter, sceneRadius);
-
-    // DEBUG: Print the matrix values
-    glm::mat4 matrix = shadowMapInfo.lightSpaceMatrix;
-    std::cout << "=== Light Space Matrix ===" << std::endl;
-    for(int i = 0; i < 4; i++) {
-        std::cout << "[" << matrix[i][0] << ", " << matrix[i][1] << ", " << matrix[i][2] << ", " << matrix[i][3] << "]" << std::endl;
-    }
-    // Calculate light space matrix
-
-    // Bind shadow framebuffer
-    shadowMapInfo.shadowBuffer->bind();
-    
-    // Set shadow shader uniforms
-    shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowMapInfo.lightSpaceMatrix));
-
-    // Render each model for shadows ONLY
-    for(const Model& model : scene.getModels()) {
-        shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
-        
-        // Use a simple draw that only renders geometry
-        const_cast<Model&>(model).drawGeometryOnly();
-    }
-
-    // Unbind shadow framebuffer
-    shadowMapInfo.shadowBuffer->unbind();
-}
-
-void ShadowManager::renderSpotLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo) {
-    shadowInfo.lightSpaceMatrix = shadowInfo.shadowBuffer->getSpotLightMatrix(light);
-
-    shadowInfo.shadowBuffer->bind();
-    shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowInfo.lightSpaceMatrix));
-
-    for(const Model& model : scene.getModels()) {
-        shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
-        const_cast<Model&>(model).drawGeometryOnly();
-    }
-
-    shadowInfo.shadowBuffer->unbind();
-}
-
-void ShadowManager::renderPointLightShadow(const Light&, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo) {
-    std::cout << "Point light shadows not implemented yet." << std::endl;
-}
-
 
 void ShadowManager::bindShadowMapsForRendering(Shader& shader) {
     shader.activate();
@@ -193,4 +90,111 @@ const char* getLightTypeName(LightType type) {
         case LightType::Spot: return "Spot";
         default: return "Unknown";
     }
+}
+
+
+void ShadowManager::renderShadowMaps(const LightManager& lightManager, Scene& scene, Shader& shadowShader, const Camera& camera) {
+    // Save current OpenGL state
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    
+    std::cout << "Starting shadow map rendering with camera..." << std::endl;
+
+    for(auto& shadowInfo : shadowMaps) {
+        if(!shadowInfo.enabled || shadowInfo.lightIndex >= lightManager.getLightCount()) {
+            continue;
+        }
+
+        const Light& light = lightManager.getLight(shadowInfo.lightIndex);
+        if(!light.getProperties().enabled) {
+            continue;
+        }
+
+        std::cout << "Rendering shadow for light " << shadowInfo.lightIndex << std::endl;
+
+        shadowShader.activate();
+
+        switch (light.getType()) {
+            case LightType::Directional:
+                renderDirectionalLightShadow(light, scene, shadowShader, shadowInfo, camera);
+                break;
+            case LightType::Spot:
+                renderSpotLightShadow(light, scene, shadowShader, shadowInfo, camera);
+                break;
+            case LightType::Point:
+                renderPointLightShadow(light, scene, shadowShader, shadowInfo, camera);
+                break;
+        }
+        
+        shadowShader.deactivate();
+        
+        GLenum error = glGetError();
+        if (error != GL_NO_ERROR) {
+            std::cerr << "OpenGL error after shadow light " << shadowInfo.lightIndex << ": " << error << std::endl;
+        }
+    }
+
+    // Restore OpenGL state
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    glUseProgram(currentProgram);
+    
+    std::cout << "Shadow map rendering complete." << std::endl;
+}
+
+void ShadowManager::renderDirectionalLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowMapInfo, const Camera& camera) {
+    std::cout << "=== Rendering Directional Light Shadow ===" << std::endl;
+    
+    // Calculate light space matrix using the camera
+    shadowMapInfo.lightSpaceMatrix = shadowMapInfo.shadowBuffer->getLightSpaceMatrix(light, camera);
+    
+    // Bind shadow framebuffer
+    shadowMapInfo.shadowBuffer->bind();
+    
+    // Clear and setup for shadow rendering
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT); // Reduce shadow acne
+    
+    // Set shadow shader uniforms
+    shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowMapInfo.lightSpaceMatrix));
+    
+    // Render each model for shadows
+    int modelCount = 0;
+    for(const Model& model : scene.getModels()) {
+        shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
+        const_cast<Model&>(model).drawGeometryOnly();
+        modelCount++;
+    }
+    
+    std::cout << "Rendered " << modelCount << " models to shadow map" << std::endl;
+    
+    // Restore face culling
+    glCullFace(GL_BACK);
+    
+    // Unbind shadow framebuffer
+    shadowMapInfo.shadowBuffer->unbind();
+}
+
+void ShadowManager::renderSpotLightShadow(const Light& light, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo, const Camera& camera) {
+    // For spot lights, we can still use the existing method since it doesn't depend on scene bounds as much
+    shadowInfo.lightSpaceMatrix = shadowInfo.shadowBuffer->getSpotLightMatrix(light);
+    
+    shadowInfo.shadowBuffer->bind();
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glCullFace(GL_FRONT);
+    
+    shadowShader.setMat4("lightSpaceMatrix", glm::value_ptr(shadowInfo.lightSpaceMatrix));
+    
+    for(const Model& model : scene.getModels()) {
+        shadowShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
+        const_cast<Model&>(model).drawGeometryOnly();
+    }
+    
+    glCullFace(GL_BACK);
+    shadowInfo.shadowBuffer->unbind();
+}
+
+void ShadowManager::renderPointLightShadow(const Light&, Scene& scene, Shader& shadowShader, ShadowMapInfo& shadowInfo, const Camera& camera) {
+    std::cout << "Point light shadows not implemented yet." << std::endl;
 }
