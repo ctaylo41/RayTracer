@@ -21,9 +21,17 @@ public:
 
     bool loadGLTF(const std::string& path);
     void draw(Shader& shader);
+    
+    // New shadow-aware drawing methods
+    void drawWithShadows(Shader& shader, const glm::mat4& lightSpaceMatrix, GLuint shadowMapTexture, bool shadowsEnabled);
+    void drawDepthOnly(Shader& depthShader, const glm::mat4& lightSpaceMatrix);
 
     void setSkybox(const std::string& directory);
     void setSkyboxShader(const std::string& vertexPath, const std::string& fragmentPath);
+    
+    // Add getter methods for shadow system
+    Skybox* getSkybox() const { return skybox.get(); }
+    Shader* getSkyboxShader() const { return skyboxShader.get(); }
 
     LightManager& getLightManager() { return lightManager; }
     const LightManager& getLightManager() const { return lightManager; }
@@ -33,6 +41,8 @@ public:
     size_t addSpotLight(const glm::vec3& position, const glm::vec3& direction, 
                        const glm::vec3& color = glm::vec3(1.0f), float intensity = 1.0f,
                        float innerCutoff = 12.5f, float outerCutoff = 17.5f);
+
+    std::vector<Model>& getModels()  { return models; }
 private:
     std::vector<Model> models;
     std::unique_ptr<Skybox> skybox;

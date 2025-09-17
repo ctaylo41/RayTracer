@@ -5,8 +5,9 @@ in vec3 FragPos;
 in vec3 Color;
 in vec3 Normal;
 in vec2 TexCoord;
-in vec3 Tangent;   // Need to add this
-in vec3 Bitangent; // Need to add this
+in vec3 Tangent;
+in vec3 Bitangent;
+in vec4 FragPosLightSpace; // Add this for shadow mapping
 
 out vec4 fragColor;
 
@@ -16,6 +17,10 @@ uniform sampler2D normalTexture;
 uniform sampler2D metallicRoughnessTexture;
 uniform sampler2D occlusionTexture;
 uniform sampler2D emissiveTexture;
+
+// Shadow mapping
+uniform sampler2D shadowMap;
+uniform bool enableShadows;
 
 // Material factor uniforms
 uniform float metallicFactor;
@@ -30,7 +35,7 @@ uniform bool useAlphaBlending;
 // Camera position
 uniform vec4 viewPos;
 
-// Light structures (same as before)
+// Light structures
 struct DirectionalLight {
     vec4 direction;
     vec4 color;
@@ -62,6 +67,47 @@ uniform DirectionalLight directionalLights[4];
 uniform PointLight pointLights[32];
 uniform SpotLight spotLights[16];
 
+// Shadow calculation function
+float calculateShadow(vec4 fragPosLightSpace) {
+    if (!enableShadows) return 0.0;
+    
+    // Perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    
+    // Transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+    
+    // Check if fragment is outside light's view frustum
+    if (projCoords.z > 1.0) return 0.0;
+    
+    // Get current fragment depth
+    float currentDepth = projCoords.z;
+    
+    // Sample shadow map
+    float closestDepth = texture(shadowMap, projCoords.xy).r;
+    
+    // Calculate bias to prevent shadow acne
+    vec3 normal = normalize(Normal);
+    vec3 lightDir = normalize(-directionalLights[0].direction.xyz);
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    
+    // Check if fragment is in shadow
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+    
+    // PCF (Percentage Closer Filtering) for softer shadows
+    shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for(int x = -1; x <= 1; ++x) {
+        for(int y = -1; y <= 1; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+    
+    return shadow;
+}
+
 // Function to get proper normal (with normal mapping)
 vec3 getNormalFromMap() {
     return normalize(Normal);
@@ -91,8 +137,8 @@ vec3 getNormalFromMap() {
     return normalize(TBN * tangentNormal);
 }
 
-// Lighting functions (same as before but using proper normal)
-vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 baseColor, float metallic, float roughness) {
+// Lighting functions with shadow support
+vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec3 baseColor, float metallic, float roughness, float shadow) {
     if (!light.enabled) return vec3(0.0);
     
     vec3 lightDir = normalize(-light.direction.xyz);
@@ -108,7 +154,8 @@ vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     vec3 diffuse = diff * baseColor.rgb * (1.0 - metallic);
     vec3 specular = spec * mix(vec3(0.04), baseColor.rgb, metallic);
     
-    return (diffuse + specular) * light.color.rgb * light.color.w;
+    // Apply shadow (reduce diffuse and specular by shadow amount)
+    return (diffuse + specular) * light.color.rgb * light.color.w * (1.0 - shadow);
 }
 
 vec3 calculatePointLight(PointLight light, vec3 fragPos, vec3 normal, vec3 viewDir, vec3 baseColor, float metallic, float roughness) {
@@ -196,21 +243,25 @@ void main() {
     vec3 norm = getNormalFromMap();
     vec3 viewDir = normalize(viewPos.xyz - FragPos);
     
+    // Calculate shadow
+    float shadow = calculateShadow(FragPosLightSpace);
+    
     // Start with ambient light
     vec3 ambient = 0.3 * baseColor.rgb;
     vec3 lighting = ambient;
     
-    // Add directional lights
+    // Add directional lights (only first directional light casts shadows for now)
     for (int i = 0; i < int(numDirectionalLights) && i < 4; i++) {
-        lighting += calculateDirectionalLight(directionalLights[i], norm, viewDir, baseColor.rgb, metallic, roughness);
+        float lightShadow = (i == 0) ? shadow : 0.0; // Only first light casts shadows
+        lighting += calculateDirectionalLight(directionalLights[i], norm, viewDir, baseColor.rgb, metallic, roughness, lightShadow);
     }
     
-    // Add point lights
+    // Add point lights (no shadows for now)
     for (int i = 0; i < int(numPointLights) && i < 32; i++) {
         lighting += calculatePointLight(pointLights[i], FragPos, norm, viewDir, baseColor.rgb, metallic, roughness);
     }
     
-    // Add spot lights
+    // Add spot lights (no shadows for now)
     for (int i = 0; i < int(numSpotLights) && i < 16; i++) {
         lighting += calculateSpotLight(spotLights[i], FragPos, norm, viewDir, baseColor.rgb, metallic, roughness);
     }
@@ -221,24 +272,7 @@ void main() {
     // Add emissive
     vec3 finalColor = lighting + emissiveColor;
     finalColor = max(finalColor, vec3(0.05));
+    
     // Output final color
     fragColor = vec4(finalColor, baseColor.a);
-
-
-    // Debug modes:
-    // fragColor = vec4(norm * 0.5 + 0.5, 1.0);  // Visualize normal mapping
-    // fragColor = vec4(baseColor.rgb, 1.0);
-
-    // Debug metallic values (should be mostly black for non-metals)
-    //fragColor = vec4(vec3(metallic), 1.0);
-
-    // Debug roughness values
-    //fragColor = vec4(vec3(roughness), 1.0);
-
-    // Debug ambient occlusion
-    //fragColor = vec4(vec3(aoFactor), 1.0);
-
-    // Force minimum brightness to see geometry
-    // vec3 finalColor = max(lighting + emissiveColor, vec3(0.05));
-    // fragColor = vec4(finalColor, baseColor.a);
 }

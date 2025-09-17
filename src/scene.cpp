@@ -290,8 +290,6 @@ Model Scene::assimpMeshToModel(aiMesh* mesh, const aiScene* scene, const std::st
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
             glm::vec3 tangent(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
             glm::vec3 bitangent(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
-            std::cout << "Tangent " << i << ": (" << tangent.x << ", " << tangent.y << ", " << tangent.z << ")" << std::endl;
-            std::cout << "Bitangent " << i << ": (" << bitangent.x << ", " << bitangent.y << ", " << bitangent.z << ")" << std::endl;
             tangents.push_back(tangent);
             bitangents.push_back(bitangent);
         }
@@ -316,20 +314,76 @@ Camera& Scene::getCamera() {
 }
 
 void Scene::draw(Shader& shader) {
-
+    // Draw skybox first if available
     if(skybox && skyboxShader) {
         skybox->draw(*skyboxShader, camera);
     }
+    
+    // Activate main shader and set up lighting
     shader.activate();
     lightManager.updateShaderUniforms(shader);
+    
+    // Set camera position
     glm::vec3 camPos = camera.getPosition();
     shader.setVec3("cameraPos", glm::value_ptr(camPos));
+    shader.setVec4("viewPos", glm::value_ptr(glm::vec4(camPos, 1.0f)));
 
+    // Draw all models
     for (Model& model : models) {
         model.draw(shader, camera);
     }
+    
     shader.deactivate();
 }
+
+// New method for shadow-aware drawing
+void Scene::drawWithShadows(Shader& shader, const glm::mat4& lightSpaceMatrix, GLuint shadowMapTexture, bool shadowsEnabled) {
+    // Draw skybox first if available
+    if(skybox && skyboxShader) {
+        skybox->draw(*skyboxShader, camera);
+    }
+    
+    // Activate main shader and set up lighting
+    shader.activate();
+    lightManager.updateShaderUniforms(shader);
+    
+    // Set camera position
+    glm::vec3 camPos = camera.getPosition();
+    shader.setVec3("cameraPos", glm::value_ptr(camPos));
+    shader.setVec4("viewPos", glm::value_ptr(glm::vec4(camPos, 1.0f)));
+    
+    // Set shadow uniforms
+    shader.setBool("enableShadows", shadowsEnabled);
+    shader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpaceMatrix));
+    
+    // Bind shadow map to texture unit 5
+    glActiveTexture(GL_TEXTURE5);
+    glBindTexture(GL_TEXTURE_2D, shadowMapTexture);
+    glUniform1i(glGetUniformLocation(shader.ID, "shadowMap"), 5);
+
+    // Draw all models
+    for (Model& model : models) {
+        model.draw(shader, camera);
+    }
+    
+    shader.deactivate();
+}
+
+// Method for depth-only rendering (for shadow pass)
+void Scene::drawDepthOnly(Shader& depthShader, const glm::mat4& lightSpaceMatrix) {
+    depthShader.activate();
+    depthShader.setMat4("lightSpaceMatrix", glm::value_ptr(lightSpaceMatrix));
+    
+    // Draw all models with depth shader
+    for (const Model& model : models) {
+        depthShader.setMat4("model", glm::value_ptr(model.getModelMatrix()));
+        // We need to render just the geometry - the depth shader handles this
+        const_cast<Model&>(model).draw(depthShader, camera);
+    }
+    
+    depthShader.deactivate();
+}
+
 
 void Scene::setSkybox(const std::string& directory) {
     std::vector<std::string> skyboxFilePaths;

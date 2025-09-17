@@ -241,3 +241,22 @@ void Model::calculateTangents(std::vector<Vertex>& vertices, const std::vector<u
         }
     }
 }
+
+void Model::drawDepthOnly(Shader& shader) {
+    // Initialize OpenGL objects on first draw
+    if (!initialized) {
+        initializeGL();
+        if (!initialized) {
+            std::cerr << "Failed to initialize OpenGL objects for model!" << std::endl;
+            return;
+        }
+    }
+
+    // Set model matrix only (no textures, no lighting uniforms)
+    shader.setMat4("model", glm::value_ptr(this->getModelMatrix()));
+
+    // Draw geometry only
+    vao->bind();
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+    vao->unbind();
+}

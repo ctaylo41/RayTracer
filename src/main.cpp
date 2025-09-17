@@ -17,6 +17,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "imGuiLightManager.h"
+#include "shadowManager.h" // Add this include
 
 const unsigned int width = 1200;
 const unsigned int height = 800;
@@ -25,95 +26,21 @@ float lastX = width / 2.0f;
 float lastY = height / 2.0f;
 bool firstMouse = true;
 
-// Pyramid vertex data: position (x, y, z) and color (r, g, b)
-
-// positions (x, y, z), colors (r, g, b), UVs (u, v)
-
-// Each face has its own vertices and UVs for proper texture repetition
-
 void setupSponzaLighting(Scene& scene) {
     // Main sun light - directional light from above at an angle
-    scene.addDirectionalLight(
+    size_t mainLightIndex = scene.addDirectionalLight(
         glm::normalize(glm::vec3(0.3f, -0.8f, 0.5f)), // Direction (sun angle)
         glm::vec3(1.0f, 0.95f, 0.8f),                 // Warm sunlight color
         2.0f                                           // Intensity
     );
     
-    // Secondary fill light - softer directional light
-    // scene.addDirectionalLight(
-    //     glm::normalize(glm::vec3(-0.2f, -0.3f, -0.8f)), // Different direction
-    //     glm::vec3(1.0f, 95.0f, 1.0),                    // Cool blue fill
-    //     0.5f                                             // Lower intensity
-    // );
-    
-    // // Point lights for interior lighting
-    // // Central courtyard light
-    // scene.addPointLight(
-    //     glm::vec3(0.0f, 8.0f, 0.0f),     // Position above courtyard
-    //     glm::vec3(1.0f, 0.9f, 0.7f),     // Warm white
-    //     15.0f                             // Higher intensity for large area
-    // );
-    
-    // // Corner accent lights
-    // scene.addPointLight(
-    //     glm::vec3(-8.0f, 4.0f, -8.0f),   // Left corner
-    //     glm::vec3(1.0f, 0.6f, 0.2f),     // Orange/amber
-    //     8.0f
-    // );
-    
-    // scene.addPointLight(
-    //     glm::vec3(8.0f, 4.0f, -8.0f),    // Right corner
-    //     glm::vec3(0.2f, 0.8f, 1.0f),     // Cool blue
-    //     8.0f
-    // );
-    
-    // scene.addPointLight(
-    //     glm::vec3(-8.0f, 4.0f, 8.0f),    // Back left
-    //     glm::vec3(0.8f, 1.0f, 0.6f),     // Green tint
-    //     8.0f
-    // );
-    
-    // scene.addPointLight(
-    //     glm::vec3(8.0f, 4.0f, 8.0f),     // Back right
-    //     glm::vec3(1.0f, 0.8f, 1.0f),     // Magenta tint
-    //     8.0f
-    // );
-    
-    // // Spot lights for dramatic effect
-    // // Entrance spotlight
-    // scene.addSpotLight(
-    //     glm::vec3(0.0f, 12.0f, -15.0f),          // Position above entrance
-    //     glm::normalize(glm::vec3(0.0f, -1.0f, 0.5f)), // Pointing down and forward
-    //     glm::vec3(1.0f, 1.0f, 1.0f),             // White light
-    //     20.0f,                                    // High intensity
-    //     15.0f,                                    // Inner cutoff angle
-    //     25.0f                                     // Outer cutoff angle
-    // );
-    
-    // // Side corridor spotlights
-    // scene.addSpotLight(
-    //     glm::vec3(-12.0f, 8.0f, 0.0f),           // Left corridor
-    //     glm::normalize(glm::vec3(1.0f, -0.5f, 0.0f)), // Pointing right and down
-    //     glm::vec3(1.0f, 0.8f, 0.6f),             // Warm light
-    //     12.0f,
-    //     20.0f,
-    //     30.0f
-    // );
-    
-    // scene.addSpotLight(
-    //     glm::vec3(12.0f, 8.0f, 0.0f),            // Right corridor
-    //     glm::normalize(glm::vec3(-1.0f, -0.5f, 0.0f)), // Pointing left and down
-    //     glm::vec3(0.6f, 0.8f, 1.0f),             // Cool light
-    //     12.0f,
-    //     20.0f,
-    //     30.0f
-    // );
+    // Enable shadows for the main directional light
+    scene.getLightManager().getLight(mainLightIndex).getProperties().castsShadows = true;
     
     std::cout << "Sponza lighting setup complete!" << std::endl;
     std::cout << "Lights added: " << scene.getLightManager().getLightCount() << std::endl;
     scene.getLightManager().printLightInfo();
 }
-
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
@@ -132,10 +59,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
-
     camera->ProcessMouseScroll(yoffset);
 }
-
 
 int main(int, char**){
 
@@ -178,10 +103,13 @@ int main(int, char**){
     glDisable(GL_CULL_FACE);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glEnable(GL_MULTISAMPLE);
-    Scene scene("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/glTF/Sponza.gltf");
-    GLenum err;
     
-
+    Scene scene("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/glTF/Sponza.gltf");
+    
+    // Initialize shadow system
+    ShadowManager shadowManager(2048, 2048); // Use higher resolution shadow map
+    shadowManager.initialize();
+    
     scene.setSkybox("/Users/colintaylortaylor/Documents/raytracer/scenes/KhronosGroup glTF-Sample-Assets main Models-Sponza/skybox");
     scene.setSkyboxShader("/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.vert", "/Users/colintaylortaylor/Documents/raytracer/src/shaders/skybox.frag");
     setupSponzaLighting(scene);
@@ -211,17 +139,42 @@ int main(int, char**){
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
             cameraPtr->ProcessKeyboard(RIGHT, deltaTime);
 
+        // === SHADOW PASS ===
+        shadowManager.renderShadows(scene, scene.getLightManager());
+        
+        // === MAIN RENDER PASS ===
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glFrontFace(GL_CCW);
+        
+        // Use Scene's shadow-aware drawing method
+        scene.drawWithShadows(shaderProgram, 
+                             shadowManager.getLightSpaceMatrix(),
+                             shadowManager.getShadowMap().getDepthMap(),
+                             shadowManager.getShadowsEnabled());
+        
+        // === UI PASS ===
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        
+        // Add shadow controls to UI
+        if (ImGui::Begin("Shadow Controls")) {
+            bool shadowsEnabled = shadowManager.getShadowsEnabled();
+            if (ImGui::Checkbox("Enable Shadows", &shadowsEnabled)) {
+                shadowManager.setShadowsEnabled(shadowsEnabled);
+            }
+            
+            ImGui::Text("Shadow Map Resolution: %dx%d", 
+                       shadowManager.getShadowMap().getWidth(), 
+                       shadowManager.getShadowMap().getHeight());
+        }
+        ImGui::End();
+        
         lightUI.render();
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glFrontFace(GL_CCW);
-        scene.draw(shaderProgram);
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -237,6 +190,7 @@ int main(int, char**){
             fpsTimer = 0.0f;
         }
     }
+    
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();

@@ -40,6 +40,8 @@ public:
     glm::mat4x4 getModelMatrix() const { return modelMatrix; }
     void draw(Shader& shader, Camera& camera);
     MaterialProperties getMaterialProperties() const { return material; }
+    void drawDepthOnly(Shader& shader);
+
 private:
     // Use smart pointers to manage OpenGL objects
     std::unique_ptr<VertexArrayObject> vao;
